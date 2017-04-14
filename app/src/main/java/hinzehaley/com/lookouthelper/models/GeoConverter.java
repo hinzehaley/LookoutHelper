@@ -1,0 +1,154 @@
+package hinzehaley.com.lookouthelper.models;
+
+import android.location.Location;
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import hinzehaley.com.lookouthelper.Constants;
+import hinzehaley.com.lookouthelper.HomeScreen;
+import hinzehaley.com.lookouthelper.fragments.ShowConversionsFragment;
+
+/**
+ * Created by haleyhinze on 6/22/16.
+ */
+public class GeoConverter {
+
+    private ShowConversionsFragment showConversionsFragment;
+    private String legal;
+    private Location location;
+
+    /**
+     * requests the latitude and longitude from a legal description of a geolocation
+     *
+     * @param state abbreviation. Ex: ID
+     * @param meridian
+     * @param township int
+     * @param range int
+     * @param section int
+     * @param quarterSection of form NWSE to describe the Northwest corner of the SW quarter
+     */
+    public void requestLocationFromLegal(ShowConversionsFragment showConversionsFragment, String state, int meridian, int township, int range, int section, String quarterSection, String townshipDirection, String rangeDirection){
+        this.showConversionsFragment = showConversionsFragment;
+        String url = Constants.GEOCOMMUNICATOR_DOMAIN + Constants.TOWNSHIP_TO_LAT_LON
+                + state +"+" + String.format("%02d", meridian) +"+"
+                +"T" + String.format("%02d", township) + townshipDirection+ "+"
+                + "R" + String.format("%02d", range) +rangeDirection +"+SEC+"
+                + String.format("%02d", section) + "+ALIQ+" + quarterSection.toUpperCase() + "&f=pjson";
+
+       legal = "T" + township + townshipDirection + "R" + range +rangeDirection + "S" + section + quarterSection;
+
+        Log.i("URL", " getting text from: " + url);
+        new RetrieveTextFromURL(this, false, true).execute(url);
+
+    }
+
+    public void requestLegalFromLocation(ShowConversionsFragment showConversionsFragment, double lat, double lon){
+        this.showConversionsFragment = showConversionsFragment;
+        this.location = new Location("");
+        location.setLatitude(lat);
+        location.setLongitude(lon);
+
+        String url = Constants.GEOCOMMUNICATOR_DOMAIN + Constants.LAT_LON_TO_TOWNSHIP + "lat=" + lat + "&lon=" + lon + Constants.UNITS_AND_FORMAT;
+
+
+        new RetrieveTextFromURL(this, true, false).execute(url);
+
+    }
+
+    public void retrievedLocationString(String locationString){
+        location = getLocationFromJson(locationString);
+        showConversionsFragment.passInNewLocation(location, legal);
+    }
+
+    public void retrievedLegalString(String legalString){
+        legal = getLegalFromJson(legalString);
+        showConversionsFragment.passInNewLegal(location, legal);
+    }
+
+
+    private String getLegalFromJson(String json){
+        Log.i("LEGAL", " xml: " + json);
+        JSONObject jsonObj = null;
+        try {
+            jsonObj = new JSONObject(json);
+            Log.i("LEGAL", "json: " + jsonObj.toString());
+        } catch (JSONException e) {
+            Log.e("JSON exception", e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+
+
+        try {
+            JSONArray features = jsonObj.getJSONArray("features");
+
+            if(features.length() > 0){
+                String data = features.getJSONObject(0).getJSONObject("attributes").getString("landdescription");
+                Log.i("GEOLOCATION", "data: " + data);
+
+                String[] desc = data.split("0(?=[^0])|(?<=[A-Z])(?=[1-9])");
+                for(int i = 0; i<desc.length; i++){
+                    desc[i] = desc[i].replaceFirst ("^0*", "");
+                    if(desc[i].matches("[A-Z]0*")){
+                        desc[i] = desc[i].replaceAll("0", "");
+                    }
+                    Log.i("GEO", "desc: " + desc[i]);
+                }
+
+                desc[8] = desc[8].replaceFirst("([^SN]*)", "");
+
+                String description = "";
+                description += "T" + desc[2] + desc[3] + " R" + desc[4] + desc[5] + " Section " + desc[7] + " " + desc[8];
+                return description;
+            }
+
+
+
+
+           return null;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+
+    private Location getLocationFromJson(String json){
+        JSONObject jsonObj = null;
+        try {
+            jsonObj = new JSONObject(json);
+        } catch (JSONException e) {
+            Log.e("JSON exception", e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+
+        Log.i("GEOLOCATION", "JSON : " + jsonObj.toString());
+
+        try {
+            JSONArray coords = jsonObj.getJSONArray("coordinates");
+
+            if(coords.length() > 0){
+                JSONObject place = coords.getJSONObject(0);
+                double lat = place.getDouble("lat");
+                double lon = place.getDouble("lon");
+                location = new Location("");
+                location.setLatitude(lat);
+                location.setLongitude(lon);
+                return location;
+            }
+
+            return null;
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+}

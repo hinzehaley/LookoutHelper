@@ -1,0 +1,86 @@
+<resources>
+    <string name="app_name">LookoutHelper</string>
+    <string name="action_settings">Settings</string>
+    <string name="converter">Converter</string>
+    <string name="lat">Latitude : </string>
+    <string name="lon">Longitude : </string>
+    <string name="cross_lookout">Cross Lookout</string>
+    <string name="no_lookout_set">You haven\'t set your lookout information! Please update information in the settings menu to continue</string>
+    <string name="ok">OK</string>
+    <string name="settings">Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_internet">You are not connected to a network. Please connect and try again.</string>
+    <string name = "could_not_parse_location">Unable to get coordinates. Please ensure the legal entered is valid</string>
+    <string name="could_not_parse_coordinates">Unable to get legal. Please ensure the coordinates are the correct format and the point you are converting is not located in water.</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string-array name="spinner_north_south">
+        <item>N</item>
+        <item>S</item>
+    </string-array>
+
+    <string-array name="spinner_east_west">
+        <item>E</item>
+        <item>W</item>
+    </string-array>
+    <string name="title_activity_settings">Settings</string>
+
+
+    <string-array name="states">
+        <item>AL</item>
+        <item>AR</item>
+        <item>AZ</item>
+        <item>CA</item>
+        <item>CO</item>
+        <item>CT</item>
+        <item>DE</item>
+        <item>DC</item>
+        <item>FL</item>
+        <item>GA</item>
+        <item>HI</item>
+        <item>ID</item>
+        <item>IL</item>
+        <item>IN</item>
+        <item>IA</item>
+        <item>KS</item>
+        <item>KY</item>
+        <item>LA</item>
+        <item>ME</item>
+        <item>MD</item>
+        <item>MA</item>
+        <item>MI</item>
+        <item>MN</item>
+        <item>MS</item>
+        <item>MO</item>
+        <item>MT</item>
+        <item>NE</item>
+        <item>NV</item>
+        <item>NH</item>
+        <item>NJ</item>
+        <item>NM</item>
+        <item>NY</item>
+        <item>NC</item>
+        <item>ND</item>
+        <item>OH</item>
+        <item>OK</item>
+        <item>OR</item>
+        <item>PA</item>
+        <item>RI</item>
+        <item>SC</item>
+        <item>SD</item>
+        <item>TN</item>
+        <item>TX</item>
+        <item>UT</item>
+        <item>VT</item>
+        <item>VA</item>
+        <item>WA</item>
+        <item>WV</item>
+        <item>WI</item>
+        <item>WY</item>
+    </string-array>
+    <string name="title_activity_maps">Map</string>
+
+</resources>

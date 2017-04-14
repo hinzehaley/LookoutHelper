@@ -1,0 +1,220 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="hinzehaley.com.lookouthelper.fragments.AzimuthFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:padding="15dp"
+        android:layout_height="match_parent">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <CheckBox
+                android:id="@+id/checkbox_base_visible"
+                android:hint="Base Visible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
+            <CheckBox
+                android:id="@+id/checkbox_have_cross"
+                android:hint="Have Cross"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+                <TextView
+                    android:text="Horizontal Azimuth"
+                    android:textSize="25dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/et_horizontal_azimuth_degrees"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:hint="Degrees"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
+            android:inputType="numberSigned"
+            android:layout_height="wrap_content" />
+
+
+                    <EditText
+                        android:id="@+id/et_horizontal_azimuth_minutes"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:hint="Minutes"
+                        android:singleLine="true"
+                        android:imeOptions="actionNext"
+                        android:inputType="numberSigned"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_vertical_azimuth"
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:text="Vertical Azimuth"
+                        android:textSize="25dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:text="Vertical azimuth only necessary with no cross. If you can't see the smoke base, take the vertical azimuth for the lowest visible part of the smoke."
+                        android:layout_height="wrap_content" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="2"
+                        android:layout_height="wrap_content">
+
+                        <EditText
+                            android:id="@+id/et_vertical_azimuth_degrees"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:hint="Degrees"
+                            android:singleLine="true"
+                            android:imeOptions="actionNext"
+                            android:inputType="numberSigned"
+                            android:layout_height="wrap_content" />
+
+
+                        <EditText
+                            android:id="@+id/et_vertical_azimuth_minutes"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:hint="Minutes"
+                            android:singleLine="true"
+                            android:imeOptions="actionNext"
+                            android:inputType="numberSigned"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_cross"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+
+        <Spinner
+            android:id="@+id/spinner_cross_lookout"
+            android:layout_width="match_parent"
+            android:prompt="@string/cross_lookout"
+            android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Cross Horizontal Azimuth"
+                android:textSize="25dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/et_horizontal_azimuth_cross_degrees"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:hint="Degrees"
+                    android:singleLine="true"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberSigned"
+                    android:layout_height="wrap_content" />
+
+
+                <EditText
+                    android:id="@+id/et_horizontal_azimuth_cross_minutes"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:hint="Minutes"
+                    android:singleLine="true"
+                    android:imeOptions="actionNext"
+                    android:inputType="numberSigned"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+                <TextView
+                    android:text="Additional Info"
+                    android:textSize="25dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <EditText
+                    android:id="@+id/et_smoke_color"
+                    android:layout_width="match_parent"
+                    android:hint="Smoke Color"
+                    android:singleLine="true"
+                    android:imeOptions="actionNext"
+                    android:layout_height="wrap_content" />
+
+                <EditText
+                    android:id="@+id/et_landmark"
+                    android:layout_width="match_parent"
+                    android:hint="Landmark"
+                    android:singleLine="true"
+                    android:imeOptions="actionNext"
+                    android:layout_height="wrap_content" />
+
+                <EditText
+                    android:id="@+id/et_additional_info"
+                    android:layout_width="match_parent"
+                    android:hint="Additional Info"
+                    android:singleLine="true"
+                    android:imeOptions="actionNext"
+                    android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btn_next"
+            android:text="Next"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="400dp"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</FrameLayout>

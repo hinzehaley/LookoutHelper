@@ -1,0 +1,36 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="hinzehaley.com.lookouthelper.fragments.CrossLookoutFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+            <ListView
+                android:id="@+id/lst_cross_lookouts"
+                android:layout_above="@+id/btn_add"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"></ListView>
+
+
+
+        <Button
+            android:id="@+id/btn_add"
+            android:layout_width="match_parent"
+            android:text="Add Cross Lookout"
+            android:layout_above="@+id/btn_done"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btn_done"
+            android:layout_width="match_parent"
+            android:text="Done"
+            android:layout_alignParentBottom="true"
+            android:layout_height="wrap_content" />
+
+
+    </RelativeLayout>
+
+</FrameLayout>

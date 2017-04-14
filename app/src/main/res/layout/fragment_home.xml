@@ -1,0 +1,25 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="hinzehaley.com.lookouthelper.fragments.HomeFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/btn_report"
+            android:text="Report Fire"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+       <Button
+           android:id="@+id/btn_converter"
+           android:text="@string/converter"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+</FrameLayout>

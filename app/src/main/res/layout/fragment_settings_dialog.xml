@@ -1,0 +1,160 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:padding="10dp"
+    android:background="@color/white"
+    android:elevation="10dp"
+    tools:context="hinzehaley.com.lookouthelper.DialogFragments.SettingsDialog">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="Settings"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal"
+            android:textSize="25dp"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="State: "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Spinner
+                android:id="@+id/spinner_state"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
+        <TextView
+            android:text="Enter the integer representation of the principal meridan (Example: 08)."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+            <EditText
+                android:id="@+id/et_meridian"
+                android:inputType="numberDecimal"
+                android:hint="Principal Meridian"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+
+        <TextView
+            android:text="Lookout Location: "
+            android:textSize="29dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="Enter lat and lon in any form, with a colon separating degrees, minutes, and seconds."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="Examples : 45:44:32 or 44.13456, or 44:32.159"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/et_lookout_lat"
+                android:layout_width="0dp"
+                android:singleLine="true"
+                android:imeOptions="actionNext"
+                android:layout_weight="1"
+                android:hint="Latitude"
+                android:layout_height="wrap_content" />
+
+                <EditText
+                    android:id="@+id/et_lookout_lon"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:singleLine="true"
+                    android:imeOptions="actionNext"
+                    android:hint="Longitude"
+                    android:layout_height="wrap_content" />
+
+
+
+            </LinearLayout>
+
+        <EditText
+            android:id="@+id/et_lookout_elevation"
+            android:layout_width="match_parent"
+            android:hint="Elevation in Feet"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
+            android:inputType="numberDecimal"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_height="wrap_content">
+
+
+            <Button
+                android:id="@+id/btn_cancel_settings"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="Cancel"
+                android:layout_height="wrap_content" />
+
+
+        <Button
+            android:id="@+id/btn_save_settings"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="SAVE"
+            android:layout_height="wrap_content" />
+
+
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="300dp"/>
+
+
+
+    </LinearLayout>
+
+
+
+    </ScrollView>
+
+    </LinearLayout>
+
+
+
+</FrameLayout>

@@ -1,0 +1,29 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="hinzehaley.com.lookouthelper.fragments.MapReportFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:weightSum="5"
+        android:layout_height="match_parent">
+   <RelativeLayout
+       android:id="@+id/map_container"
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       android:layout_weight="3">
+
+   </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/conversions_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2">
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
