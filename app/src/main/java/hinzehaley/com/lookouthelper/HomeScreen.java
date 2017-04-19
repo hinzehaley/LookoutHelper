@@ -16,10 +16,32 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import hinzehaley.com.lookouthelper.DialogFragments.SettingsDialog;
-import hinzehaley.com.lookouthelper.fragments.AzimuthFragment;
+import hinzehaley.com.lookouthelper.fragments.InfoReportFragment;
 import hinzehaley.com.lookouthelper.fragments.ConverterFragment;
 import hinzehaley.com.lookouthelper.fragments.CrossLookoutFragment;
 import hinzehaley.com.lookouthelper.fragments.HomeFragment;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
+
+/*
+TODO:
+If user doesn't enter lat and long for a lookout, show error. Right now it crashes.
+Make it so user can click point along line and get elevation difference, lat, long, legal for that point
+Make it so user can change map type
+Test cross feature
+See if I can make soft keyboard data entry better... Digits only for lat lng, but some way of separating h m s?
+Add a good tutorial
+Make everything prettier
+Test it all somehow...
+Maybe make feature for when fire is behind a ridge....? Ehh... probably not.
+Possibly mess with database stuff and logins (but probably not...)
+Store reported fires -- make it possible to update them?
+
+ */
+
+/**
+ * Only Activity, controls which fragments are visible
+ */
 
 public class HomeScreen extends AppCompatActivity {
 
@@ -30,41 +52,43 @@ public class HomeScreen extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        SharedPreferences prefs = getSharedPreferences(this.getPackageName(), Context.MODE_PRIVATE);
-
         HomeFragment homeFragment = HomeFragment.newInstance();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, homeFragment);
         transaction.commit();
 
-        if(prefs.getString("state", null) == null){
+        //detects if user hasn't entered lookout location, shows dialog to get info
+        if(!lookoutInfoSet()){
             showSettingsDialog();
         }
-
-
-
     }
 
+    /**
+     * @return false if lookout info not set. True otherwise
+     */
     public boolean lookoutInfoSet(){
         SharedPreferences prefs = getSharedPreferences(this.getPackageName(), Context.MODE_PRIVATE);
-        if(prefs.getString(Constants.STATE_PREFERENCES_KEY, null) == null){
+        if(prefs.getString(PreferencesKeys.STATE_PREFERENCES_KEY, null) == null){
             return false;
         }
-        if(prefs.getFloat(Constants.LOOKOUT_LAT_PREFERENCES_KEY, 0) == 0){
+        if(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0) == 0){
             return false;
         }
-        if(prefs.getFloat(Constants.LOOKOUT_LON_PREFERENCES_KEY, 0) == 0){
+        if(prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0) == 0){
             return false;
         }
-        if(prefs.getFloat(Constants.LOOKOUT_ELEVATION_PREFERENCES_KEY, -1) == -1){
+        if(prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, -1) == -1){
             return false;
         }
-        if(prefs.getInt(Constants.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1) == -1){
+        if(prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1) == -1){
             return false;
         }
         return true;
     }
 
+    /**
+     * Shows dialog for user to input lookout info
+     */
     private void showSettingsDialog(){
         if(getSupportFragmentManager().findFragmentByTag("SettingsDialog")==null) {
             DialogFragment newFragment = new SettingsDialog();
@@ -81,6 +105,11 @@ public class HomeScreen extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Sets up menu items
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -100,20 +129,34 @@ public class HomeScreen extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Shows fragment to input legal or lat lng and convert
+     */
     public void goToConverterFragment(){
         ConverterFragment converterFragment = ConverterFragment.newInstance();
         replaceMainFragment(converterFragment);
     }
 
+    /**
+     * Shows fragment that displays conversions from legal to lat lng and vice versa
+     * @param conversionsFragment
+     */
     public void goToConversionsFragment(Fragment conversionsFragment){
         replaceMainFragment(conversionsFragment);
     }
 
+    /**
+     * Shows fragment displaying cross lookouts
+     */
     private void showCrossLookoutEditorFragment(){
         CrossLookoutFragment crossLookoutFragment = CrossLookoutFragment.newInstance();
         replaceMainFragment(crossLookoutFragment);
     }
 
+    /**
+     * Replaces the main screen fragment with a new fragment
+     * @param newFragment
+     */
     private void replaceMainFragment(Fragment newFragment){
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, newFragment);
@@ -127,10 +170,14 @@ public class HomeScreen extends AppCompatActivity {
     }
 
     public void goToAzimuthFragment(){
-        AzimuthFragment azimuthFragment = AzimuthFragment.newInstance();
-        replaceMainFragment(azimuthFragment);
+        InfoReportFragment infoReportFragment = InfoReportFragment.newInstance();
+        replaceMainFragment(infoReportFragment);
     }
 
+    /**
+     * Shows an error dialog with the option to go to settings or cancel
+     * @param message
+     */
     public void showErrorDialog(String message){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message);
@@ -160,6 +207,10 @@ public class HomeScreen extends AppCompatActivity {
         errorDialog.show();
     }
 
+    /**
+     * Shows an error dialog with the provided message and an OK button that cancels the dialog
+     * @param message
+     */
     public void showBasicErrorMessage(String message){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message);
@@ -190,5 +241,21 @@ public class HomeScreen extends AppCompatActivity {
                 activeNetwork.isConnectedOrConnecting();
         return isConnected;
 
+    }
+
+    /**
+     * When back button pressed in menu bar, goes back to previous page
+     * @return
+     */
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 }

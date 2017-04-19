@@ -7,6 +7,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,21 +26,23 @@ import java.util.ArrayList;
 import hinzehaley.com.lookouthelper.Constants;
 import hinzehaley.com.lookouthelper.DialogFragments.LookoutEditorDialog;
 import hinzehaley.com.lookouthelper.DialogFragments.SettingsDialog;
+import hinzehaley.com.lookouthelper.Interfaces.LookoutClickListener;
 import hinzehaley.com.lookouthelper.Interfaces.OnAddCrossListener;
+import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
+import hinzehaley.com.lookouthelper.adapters.LookoutAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link CrossLookoutFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CrossLookoutFragment extends Fragment implements OnAddCrossListener{
+public class CrossLookoutFragment extends Fragment implements OnAddCrossListener, LookoutClickListener{
 
-    private ListView lstLookout;
+    private RecyclerView lstLookout;
     private Button btnAddLookout;
-    private Button btnDone;
     private View v;
-    private ArrayAdapter<String> adapter;
+    private LookoutAdapter adapter;
 
     /**
      * Use this factory method to create a new instance of
@@ -63,12 +70,13 @@ public class CrossLookoutFragment extends Fragment implements OnAddCrossListener
         // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_cross_lookout, container, false);
 
-        lstLookout = (ListView) v.findViewById(R.id.lst_cross_lookouts);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        lstLookout = (RecyclerView) v.findViewById(R.id.lst_cross_lookouts);
         btnAddLookout = (Button) v.findViewById(R.id.btn_add);
-        btnDone = (Button) v.findViewById(R.id.btn_done);
 
         setUpListOfLookouts();
-        monitorListItemClicks();
 
         btnAddLookout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,12 +85,6 @@ public class CrossLookoutFragment extends Fragment implements OnAddCrossListener
             }
         });
 
-        btnDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                goBack();
-            }
-        });
 
         return v;
     }
@@ -95,7 +97,7 @@ public class CrossLookoutFragment extends Fragment implements OnAddCrossListener
 
     private void showAddLookoutDialog(){
         LookoutEditorDialog lookoutEditorDialog = new LookoutEditorDialog();
-        lookoutEditorDialog.setArgs(adapter.getCount(), this);
+        lookoutEditorDialog.setArgs(adapter.getItemCount(), this);
         showDialog(lookoutEditorDialog);
     }
 
@@ -120,7 +122,7 @@ public class CrossLookoutFragment extends Fragment implements OnAddCrossListener
         boolean gettingLookouts = true;
         int lookoutNumber = 0;
         while(gettingLookouts){
-            String lookoutKey = Constants.CROSS_LOOKOUT_PREFERENCES_KEY + lookoutNumber;
+            String lookoutKey = PreferencesKeys.CROSS_LOOKOUT_PREFERENCES_KEY + lookoutNumber;
             String lookoutName = prefs.getString(lookoutKey, null);
             if(lookoutName != null){
                 lookoutNames.add(lookoutName);
@@ -132,40 +134,33 @@ public class CrossLookoutFragment extends Fragment implements OnAddCrossListener
         }
 
 
-        adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, android.R.id.text1, lookoutNames);
-        Log.i("adapter size", "" + adapter.getCount());
+        adapter = new LookoutAdapter(lookoutNames, this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext().getApplicationContext());
+        lstLookout.setLayoutManager(mLayoutManager);
+        lstLookout.setItemAnimator(new DefaultItemAnimator());
         lstLookout.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
     }
 
-    private void monitorListItemClicks(){
-        lstLookout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String lookoutName = adapter.getItem(i);
-                showLookoutEditorDialog(lookoutName, i);
-
-            }
-        });
-    }
 
     private void removeItem(int i){
         SharedPreferences prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        String name = prefs.getString(Constants.CROSS_LOOKOUT_PREFERENCES_KEY + i, null);
+        String name = prefs.getString(PreferencesKeys.CROSS_LOOKOUT_PREFERENCES_KEY + i, null);
         if(name != null){
-            editor.remove(Constants.CROSS_LOOKOUT_PREFERENCES_KEY + (adapter.getCount() - 1));
+            editor.remove(PreferencesKeys.CROSS_LOOKOUT_PREFERENCES_KEY + (adapter.getItemCount() - 1));
             adapter.remove(name);
-            editor.remove(Constants.CROSS_LOOKOUT_PREFERENCES_KEY + i);
-            editor.remove(name + "lat");
-            editor.remove(name + "lon");
+            editor.remove(PreferencesKeys.CROSS_LOOKOUT_PREFERENCES_KEY + i);
+            editor.remove(name + PreferencesKeys.LAT);
+            editor.remove(name + PreferencesKeys.LON);
 
-            for(int j = 0; j< adapter.getCount(); j++){
-                editor.putString(Constants.CROSS_LOOKOUT_PREFERENCES_KEY + j, adapter.getItem(j));
+            for(int j = 0; j< adapter.getItemCount(); j++){
+                editor.putString(PreferencesKeys.CROSS_LOOKOUT_PREFERENCES_KEY + j, adapter.getItem(j));
             }
         }
         editor.commit();
+        adapter.notifyDataSetChanged();
     }
 
 
@@ -177,5 +172,10 @@ public class CrossLookoutFragment extends Fragment implements OnAddCrossListener
     @Override
     public void crossDeleted(int i) {
         removeItem(i);
+    }
+
+    @Override
+    public void lookoutClicked(String name, int index) {
+        showLookoutEditorDialog(name, index);
     }
 }

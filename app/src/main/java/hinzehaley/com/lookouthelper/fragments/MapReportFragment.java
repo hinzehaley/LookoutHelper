@@ -33,23 +33,28 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import hinzehaley.com.lookouthelper.Constants;
+import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
 import hinzehaley.com.lookouthelper.models.GeoConverter;
 import hinzehaley.com.lookouthelper.models.VolleyRequester;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link MapReportFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment to display a map showing the line from the lookout and best guesses of
+ * fire location along the line. Fire location markers are color coded, with green being
+ * the most likely option and red being the least likely option.
+ *
+ * When a marker is clicked, updates a ShowConversionsFragment on the bottom of the screen to
+ * reflect markers location. Additionally, displays a window by the marker saying how much higher
+ * or lower the actual elevation of that geo point is than the elevation it should be based on
+ * calculations from azimuth and vertical angle.
  */
 public class MapReportFragment extends Fragment implements OnMapReadyCallback {
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+
+    //args keys
     private static final String SMOKE_COLOR = "smokeColor";
     private static final String CROSS_LOOKOUT = "crossLookout";
     private static final String LANDMARK = "landmark";
@@ -66,7 +71,6 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
     private JSONArray elevationArr;
 
-    // TODO: Rename and change types of parameters
     private String smokeColor;
     private String crossLookout;
     private String landmark;
@@ -78,8 +82,6 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     private float crossAzimuth;
 
     private View v;
-    private View mapContainer;
-    private View conversionsContainer;
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
     ShowConversionsFragment showConversionsFragment;
@@ -115,6 +117,11 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         // Required empty public constructor
     }
 
+    /**
+     * gets information from arguments
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,15 +138,19 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Sets up view by showing conversions fragment and filling map_container with a SupportMapFragment
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_map_report, container, false);
-        mapContainer = v.findViewById(R.id.map_container);
 
         prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
-
 
         FragmentManager fm = getChildFragmentManager();
         mMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map_container);
@@ -148,14 +159,14 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             fm.beginTransaction().replace(R.id.map_container, mMapFragment).commit();
         }
         showConversionsFragment();
-
         initilizeMap();
-
-
         return v;
     }
 
 
+    /**
+     * Initializes map
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -174,16 +185,27 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
+    /**
+     * Called when map is ready. Sets the map type, listens for marker clicks and shows
+     * marker information and location information when a marker is clicked.
+     * @param map
+     */
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
         map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        //Shows user location
         if(checkLocationPermission()) {
             map.setMyLocationEnabled(true);
         }
+
+        //Allows user to zoom
         map.getUiSettings().setZoomControlsEnabled(true);
+
         calculatePossibleFireLocation();
 
+        //When marker is clicked, shows a ShowConversionsFragment with location info
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -193,6 +215,9 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
                 return false;
             }
         });
+
+        // Sets the info window adapter to display both title and snippet
+        // in the info window for a marker
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
             @Override
@@ -226,9 +251,14 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
+    /**
+     * Calculates fire locations. Different calculations are done if there is
+     * no cross v if there is a cross
+     */
+    //TODO: don't yet have option for if base is not visible.
     private void calculatePossibleFireLocation(){
 
-        if(!haveCross && baseVisible){
+        if(!haveCross){
             noCrossVisibleBase();
         }else if(haveCross){
             haveCross();
@@ -236,33 +266,33 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
+    /**
+     * Calculates fire location by getting point where azimuth from cross lookout and your
+     * own lookout intersect
+     */
     private void haveCross(){
-        Log.i("CROSS BUG", "have cross method");
-        LatLng yourLocation = new LatLng(prefs.getFloat(Constants.LOOKOUT_LAT_PREFERENCES_KEY, 0), prefs.getFloat(Constants.LOOKOUT_LON_PREFERENCES_KEY, 0));
+        LatLng yourLocation = new LatLng(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0), prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0));
         LatLng fireLocation = null;
         float crossLat = prefs.getFloat(crossLookout + "lat", 0);
         float crossLon = prefs.getFloat(crossLookout + "lon", 0);
-
-        Log.i("CROSS BUG", "cross lat: " + crossLat + "cross lng: " + crossLon);
-
-
         LatLng crossLocation = new LatLng(crossLat, crossLon);
+
+        //gets azimuth from you to the cross lookout
         double azimuthToCross = SphericalUtil.computeHeading(yourLocation, crossLocation);
+
+        //gets azimuth from cross lookout to your lookout
         double azimuthFromCross = SphericalUtil.computeHeading(crossLocation, yourLocation);
 
+        //Corrects for azimuths that are not in valid degree range
         if(azimuthToCross < 0){
             azimuthToCross = 360 + azimuthToCross;
         }if(azimuthFromCross < 0){
             azimuthFromCross = 360 + azimuthFromCross;
         }
 
-        Log.i("CROSS BUG", "azimuth to cross: " + azimuthToCross + "azimuth from cross: " + azimuthFromCross);
-
-
-
         float angleYou;
 
-
+        //gets angle between crossAzimuth and fire azimuth
         if(horizontalAzimuth < azimuthToCross){
             angleYou = (float) (azimuthToCross - horizontalAzimuth);
         }else{
@@ -271,47 +301,45 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
         float angleCross;
 
+        //gets angle between azimuth reported by cross and azimuth to your lookout from cross lookout
         if(crossAzimuth > azimuthFromCross){
             angleCross = (float) (crossAzimuth - azimuthFromCross);
         }else{
             angleCross = (float) (azimuthFromCross - crossAzimuth);
         }
 
-        Log.i("CROSS BUG", "angle you: " + angleYou + "angle cross: " + angleCross);
-
-
+        //Has calculations of two other degrees in the triangle, uses this to get the angle between the azimuth
+        //from the fire to you and the azimuth from the fire to the cross. In a triangle, all angles add up
+        //to 180, so just subtract the other angles from 180
         float angleFire = 180 - angleYou - angleCross;
 
-        Log.i("CROSS BUG", "angle fire: " + angleFire);
-
+        //gets distance from you to cross
         double distanceToCross = SphericalUtil.computeDistanceBetween(yourLocation, crossLocation);
 
-        Log.i("CROSS BUG", "distance to cross: " + distanceToCross);
-
-
+        //gets distance from you to fire by using sin function using the angle to the cross, the angle to the fire, and the
+        //distance to the cross
         double distanceFromYouToFire = Math.abs((distanceToCross * Math.sin(Math.toRadians(angleCross)))/Math.sin(Math.toRadians(angleFire)));
-        Log.i("CROSS BUG", "distance to fire: " + distanceFromYouToFire);
 
-
+        //Gets the fire location by computing the offset from your location out along your azimuth by the distance
+        //calculated above
         fireLocation = SphericalUtil.computeOffset(yourLocation, distanceFromYouToFire, horizontalAzimuth);
 
+        //Creates marker showing fire location
         MarkerOptions closestPointMarker = new MarkerOptions();
         closestPointMarker.position(fireLocation);
         closestPointMarker.title("FIRE LOCATION!");
+        mMap.addMarker(closestPointMarker);
 
+        //Creates endpoints for lines to display on map showing azimuths from your lookout and the cross lookout
         LatLng endOfYourAzimuth = SphericalUtil.computeOffset(yourLocation, Constants.MAX_ELEVATOIN_REQUEST_DISTANCE, horizontalAzimuth);
         LatLng endOfCrossAzimuth = SphericalUtil.computeOffset(crossLocation, Constants.MAX_ELEVATOIN_REQUEST_DISTANCE, crossAzimuth);
 
-
-        mMap.addMarker(closestPointMarker);
-
+        //Draws azimuth lines on map
         PolylineOptions polylineOptions = new PolylineOptions();
         polylineOptions.add(yourLocation);
         polylineOptions.add(endOfYourAzimuth);
         polylineOptions.width(4);
         polylineOptions.color(Color.BLUE);
-
-
         mMap.addPolyline(polylineOptions);
 
         PolylineOptions polylineOptions2 = new PolylineOptions();
@@ -319,8 +347,6 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         polylineOptions2.add(endOfCrossAzimuth);
         polylineOptions2.width(4);
         polylineOptions2.color(Color.BLUE);
-
-
         mMap.addPolyline(polylineOptions2);
 
 
@@ -330,17 +356,17 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
+    /**
+     * Uses VolleyRequester to request elevations for different lat lngs from lookout along azimuth
+     * Has to break this information into multiple requests.
+     */
     private void noCrossVisibleBase(){
-        LatLng startLocation = new LatLng(prefs.getFloat(Constants.LOOKOUT_LAT_PREFERENCES_KEY, 0), prefs.getFloat(Constants.LOOKOUT_LON_PREFERENCES_KEY, 0));
+        LatLng startLocation = new LatLng(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0), prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0));
         boolean closestPointRetrieved = false;
         LatLng closestPoint = startLocation;
         VolleyRequester volleyRequester = new VolleyRequester();
-
         Arrays.fill(retrievalArray, Boolean.FALSE);
-
-
         int distAddition = (Constants.MAX_ELEVATOIN_REQUEST_DISTANCE - Constants.START_ELEVATION_REQUEST_DISTANCE)/Constants.NUM_ELEVATION_REQUESTS;
-
         for(int i = 0; i<Constants.NUM_ELEVATION_REQUESTS; i++){
             resultArrays.add(null);
             LatLng point1 = calculateLinePoint(i*distAddition + Constants.START_ELEVATION_REQUEST_DISTANCE, horizontalAzimuth, startLocation);
@@ -350,29 +376,31 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Called when VolleyRequester gets results from Google Elevation API.
+     * We are sending multiple requests, so this function stores the results. If this is
+     * the last request sent, begins calculations. Otherwise, waits for other results
+     * @param results
+     * @param resultInt
+     */
     public void elevationResult(JSONArray results, int resultInt){
 
         if(allRequestsComplete()){
             return;
         }
 
-        //if(results != null) {
-           // Log.i("NO CRASH", "results are not null for resultInt " + resultInt);
-
-            resultArrays.set(resultInt, results);
-            retrievalArray[resultInt] = true;
-
-        //}else{
-        //   Log.e("CRASH", "results are null for resultInt " + resultInt);
-       // }
-
-
+        resultArrays.set(resultInt, results);
+        retrievalArray[resultInt] = true;
         if(allRequestsComplete()){
             calculateBestMatch();
         }
 
     }
 
+    /**
+     * Checks if all the elevation requests are completed
+     * @return
+     */
     private boolean allRequestsComplete(){
         for(int i = 0; i<retrievalArray.length; i++){
             if(retrievalArray[i] == false){
@@ -382,6 +410,13 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         return true;
     }
 
+    /**
+     * Combines two arrays from elevation requests
+     * a single large array of JSONs
+     * @param arr1
+     * @param arr2
+     * @return
+     */
     //TODO: some were getting negative volley responses. Figure out why.
     private JSONArray concatArray(JSONArray arr1, JSONArray arr2){
         if(arr2 == null){
@@ -392,7 +427,7 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             try {
                 result.put(arr1.get(i));
             } catch (JSONException e) {
-                Log.i("ERROR", "JSONException" + e.getMessage());
+                Log.e("ERROR", "JSONException" + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -400,35 +435,56 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             try {
                 result.put(arr2.get(i));
             } catch (JSONException e) {
-                Log.i("ERROR", "JSONException" + e.getMessage());
+                Log.e("ERROR", "JSONException" + e.getMessage());
                 e.printStackTrace();
             }
         }
         return result;
     }
 
+    /**
+     * Combines all arrays from elevation requests into a single large array called elevationArr
+     */
     private void concatAllArrays(){
         elevationArr = new JSONArray();
         for(int i = 0; i<retrievalArray.length; i++){
-            Log.i("CONCAT", " i = " + i);
             if(resultArrays.get(i) != null) {
                 elevationArr = concatArray(elevationArr, resultArrays.get(i));
             }
         }
     }
 
-
-    //TODO: make sure closest location is visible...
-    private ArrayList<Location> calculateBestMatch(){
-        Log.i("PAUSE", "calculating best match...");
+    /**
+     * Calculates the best location matches using the elevation data retrieved from Google Elevation
+     * API. There are three possibilities for calculating the best location. To explain these options,
+     * I will describe the estimated fire elevation calculated using the lookout location, azimuth, vertical angle, and
+     * distance from lookout as the target elevation. I will describe the actual elevation of that point
+     * as retrieved from Google's Elevation API as the real elevation.
+     *
+     * 1) When cycling through the array of real elevations, where each index i is closer to the lookout than i+1,
+     * if array[i] is below the target elevation, and array[i+1] is above the target elevation, then the fire is between
+     * these two points.
+     *
+     * 2) If the fire is located on top of a ridge, the line drawn through 3D space from the lookout based on the azimuth
+     * and vertical angle may not intersect with earth's surface. In this case, an estimated degree of error is considered.
+     * If the point is within this degree of error, it is a possible fire location.
+     *
+     * 3) If neither of these options is fulfilled, finds the point where the target elevation is closest to the actual elevation
+     *
+     *
+     * @return ArrayList containing the possible locations arranged from most likely to least likely
+     */
+    //TODO: make sure closest location is visible... Location could be hidden by a ridge
+    private ArrayList<Match> calculateBestMatch(){
         concatAllArrays();
+        ArrayList<Match> matches = new ArrayList<Match>();
 
-        ArrayList<Location> matches = new ArrayList<Location>();
-        ArrayList<Double> elevations = new ArrayList<Double>();
+        //Starts at lookout
         Location startLocation = new Location("");
-        startLocation.setLatitude(prefs.getFloat(Constants.LOOKOUT_LAT_PREFERENCES_KEY, 0));
-        startLocation.setLongitude(prefs.getFloat(Constants.LOOKOUT_LON_PREFERENCES_KEY, 0));
+        startLocation.setLatitude(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0));
+        startLocation.setLongitude(prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0));
 
+        //Picks NUM_OPTIONS_TO_DISPLAY possible points, starting with the best
         for(int l = 0; l<Constants.NUM_OPTIONS_TO_DISPLAY; l++) {
 
             Location closestPoint = null;
@@ -440,6 +496,7 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
             for (int i = 0; i < elevationArr.length(); i++) {
 
+                //Parses the JSONObject to get lat, lng, and elevation of point
                 try {
                     JSONObject curObj = (JSONObject) elevationArr.get(i);
                     double elevation = curObj.getDouble("elevation");
@@ -447,37 +504,30 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
                     double lat = location.getDouble("lat");
                     double lon = location.getDouble("lng");
 
+                    //Calculates target elevation of point. Also calculates min and max
+                    //elevations based on acceptable degree of error
                     Location curLocationToCheck = new Location("");
                     curLocationToCheck.setLatitude(lat);
                     curLocationToCheck.setLongitude(lon);
-
-
                     double len = startLocation.distanceTo(curLocationToCheck);
-
                     double radiansOnLine = Math.toRadians(verticalAzimuth);
                     double tanOnLine = Math.tan(radiansOnLine);
-
                     double radiansDegreeOfError = Math.toRadians(verticalAzimuth + Constants.VERTICAL_DEGREE_OF_ERROR);
                     double tanDegreeOfError = Math.tan(radiansDegreeOfError);
-
-
                     double heightDiff = len * tanOnLine;
                     double errorHeightDiff = len * tanDegreeOfError;
-
                     double maxAcceptableErrorDiff = Math.abs(heightDiff - errorHeightDiff);
+                    double lookoutElevation = prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, 0);
+                    double targetElevation = lookoutElevation + heightDiff;
 
-                    double lookoutElevation = prefs.getFloat(Constants.LOOKOUT_ELEVATION_PREFERENCES_KEY, 0);
-                    double shouldBeElevation = lookoutElevation + heightDiff;
+                    //Gets difference between target elevation and actual elevation
+                    double elevationDiffAbs = Math.abs(targetElevation - elevation);
+                    double elevationDiff = elevation - targetElevation;
 
-
-                    double elevationDiffAbs = Math.abs(shouldBeElevation - elevation);
-
-                    double elevationDiff = elevation - shouldBeElevation;
-
-                    //Checks for if we missed ground hit.
+                    //Checks if intersection happened between elevationArr[i-1] and elevationArr[i]
+                    //if so, adds as a possible match and breaks to begin looking for next best match
                     if (i > 0) {
                         if (elevationDiff > 0 && lastLocationBelowElevation) {
-
                             if (checkIfItemMatch(curLocationToCheck, matches)) {
                                 closestPoint = curLocationToCheck;
                                 closestElevation = elevationDiffAbs;
@@ -487,14 +537,17 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
                         }
                     }
 
+                    //Indicates whether the last location was below or above location so we can check
+                    //for future intersects
                     if (elevationDiff > 0) {
                         lastLocationBelowElevation = true;
                     } else {
                         lastLocationBelowElevation = false;
                     }
 
+                    //If the elevation difference is within the acceptable degree of error,
+                    //adds a match and breaks to continue looking for next best match
                     if (elevationDiffAbs < maxAcceptableErrorDiff) {
-
                         if (checkIfItemMatch(curLocationToCheck, matches)) {
                             closestPoint = curLocationToCheck;
                             closestElevation = elevationDiffAbs;
@@ -522,28 +575,30 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Log.i("ERROR", e.getMessage());
+                    Log.e("ERROR", e.getMessage());
                 }
-
-
             }
 
             if(closestPoint != null) {
-                Log.i("POINT", "adding closest point " + l + " : " + closestPoint.getLatitude() + "  " + closestPoint.getLongitude());
-                matches.add(closestPoint);
-                elevations.add(curClosestElevationDiff);
+                matches.add(new Match(closestPoint, curClosestElevationDiff));
             }
         }
 
-        drawMarkersAndLines(matches, elevations, startLocation);
+        drawMarkersAndLines(matches, startLocation);
         return matches;
 
     }
 
-    private boolean checkIfItemMatch(Location curLocationToCheck, ArrayList<Location> matches){
+    /**
+     * Checks if Location or nearby location is already included in matches.
+     * @param curLocationToCheck
+     * @param matches
+     * @return false if curLocationToCheck is already in matches, or within a certain distance of an item in matches. True otherwise
+     */
+    private boolean checkIfItemMatch(Location curLocationToCheck, ArrayList<Match> matches){
         boolean addItem = true;
         for (int k = 0; k < matches.size(); k++) {
-            if (curLocationToCheck.distanceTo(matches.get(k)) <= Constants.DISTANCE_BETWEEN_VISIBLE_POINTS) {
+            if (curLocationToCheck.distanceTo(matches.get(k).location) <= Constants.DISTANCE_BETWEEN_VISIBLE_POINTS) {
                 addItem = false;
                 break;
             }
@@ -552,48 +607,49 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
-    private void drawMarkersAndLines(ArrayList<Location> locations, ArrayList<Double> elevationDifferences, Location startLocation){
+    /**
+     * Draws markers at matches and the line representing horizontal azimuth from lookout
+     * @param locations where best guess is at index 0, and guesses get worse at higher indices
+     * @param startLocation
+     */
+    private void drawMarkersAndLines(ArrayList<Match> locations, Location startLocation){
         for(int i = 0; i<locations.size(); i++) {
 
-            LatLng latLng = new LatLng(locations.get(i).getLatitude(), locations.get(i).getLongitude());
+            LatLng latLng = new LatLng(locations.get(i).location.getLatitude(), locations.get(i).location.getLongitude());
+            double elevationDiff = locations.get(i).elevation;
 
-            double elevationDiff = elevationDifferences.get(i);
-
-
-            //min = 20, max = 80
-            //        first increase green, then decrease red
+            //Calculates marker color based on how good of an option it is
             int multiplicand = 100/(Constants.NUM_OPTIONS_TO_DISPLAY);
             int r = (i+1) * multiplicand;
-
             int g = 100 - r;
-
             float[] hsv = new float[3];
             Color.RGBToHSV(r, g, 20, hsv);
-            Log.i("HUE", " hue is : " + hsv[0] +" for elevation: " + elevationDifferences.get(i) + " r is: " + r + " g is: " + g);
 
-            String descriptor = " higher ";
+            //Creates string for marker snippet
+            String descriptor = getString(R.string.higher);
             if(elevationDiff < 0){
-                descriptor = " lower ";
+                descriptor = getString(R.string.lower);
             }
-            String snippet = "This point is " + (String.format( "%.2f", Math.abs(elevationDiff))) + " meters" +
-                    descriptor + "\nthan it should be based on the given \nvertical angle";
-
+            String snippet = getString(R.string.this_point_is) + " " + (String.format( "%.2f", Math.abs(elevationDiff))) + " " + getString(R.string.meters) +
+                    " " + descriptor + getString(R.string.than_it_should_be);
 
             MarkerOptions marker = new MarkerOptions();
             marker.position(latLng);
-            marker.title("Guess # " + (i+1) );
+
+            //sets marker title and snippet
+            marker.title(getString(R.string.guess_num) + (i+1) );
             marker.snippet(snippet);
 
+            //crates marker icon using color calculated above
             marker.icon(BitmapDescriptorFactory.defaultMarker(hsv[0]));
-
             mMap.addMarker(marker);
 
+            //Draws line from lookout to estimated points
             PolylineOptions polylineOptions = new PolylineOptions();
             polylineOptions.add(new LatLng(startLocation.getLatitude(), startLocation.getLongitude()));
             polylineOptions.add(latLng);
             polylineOptions.width(4);
             polylineOptions.color(Color.BLUE);
-
 
             mMap.addPolyline(polylineOptions);
 
@@ -605,133 +661,11 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
-    /*//TODO: make sure closest location is visible...
-    private void calculateSecondBestMatch(Location bestMatch){
-        concatAllArrays();
-
-        Location closestPoint = null;
-        double closestElevation = -1;
-
-        boolean lastLocationBelowElevation = true;
-
-        Location startLocation = new Location("");
-        startLocation.setLatitude(prefs.getFloat(Constants.LOOKOUT_LAT_PREFERENCES_KEY, 0));
-        startLocation.setLongitude(prefs.getFloat(Constants.LOOKOUT_LON_PREFERENCES_KEY, 0));
-
-        for(int i = 0; i < elevationArr.length(); i++){
-
-            try {
-                JSONObject curObj = (JSONObject) elevationArr.get(i);
-                double elevation = curObj.getDouble("elevation");
-                JSONObject location = curObj.getJSONObject("location");
-                double lat = location.getDouble("lat");
-                double lon = location.getDouble("lng");
-
-                Location curLocationToCheck = new Location("");
-                curLocationToCheck.setLatitude(lat);
-                curLocationToCheck.setLongitude(lon);
-
-
-
-                double len = startLocation.distanceTo(curLocationToCheck);
-
-                double radiansOnLine = Math.toRadians(verticalAzimuth);
-                double tanOnLine = Math.tan(radiansOnLine);
-
-                double radiansDegreeOfError = Math.toRadians(verticalAzimuth + Constants.VERTICAL_DEGREE_OF_ERROR);
-                double tanDegreeOfError = Math.tan(radiansDegreeOfError);
-
-
-
-                double heightDiff = len * tanOnLine;
-                double errorHeightDiff = len * tanDegreeOfError;
-
-                double maxAcceptableErrorDiff = Math.abs(heightDiff - errorHeightDiff);
-
-                double lookoutElevation = prefs.getFloat(Constants.LOOKOUT_ELEVATION_PREFERENCES_KEY, 0);
-                double shouldBeElevation = lookoutElevation + heightDiff;
-
-
-
-                double elevationDiffAbs = Math.abs(shouldBeElevation - elevation);
-
-                double elevationDiff = elevation - shouldBeElevation;
-
-                //Checks for if we missed ground hit.
-                if(i>0) {
-                    if (elevationDiff > 0 && lastLocationBelowElevation) {
-                        if(curLocationToCheck.distanceTo(bestMatch) > Constants.DISTANCE_BETWEEN_VISIBLE_POINTS) {
-                            closestPoint = curLocationToCheck;
-                        }
-                        break;
-                    }
-                }
-
-                if(elevationDiff > 0){
-                    lastLocationBelowElevation = true;
-                }else{
-                    lastLocationBelowElevation = false;
-                }
-
-                if(elevationDiffAbs < maxAcceptableErrorDiff){
-                    if(curLocationToCheck.distanceTo(bestMatch) > Constants.DISTANCE_BETWEEN_VISIBLE_POINTS) {
-                        closestPoint = curLocationToCheck;
-                    }
-                    break;
-                }
-
-                //If no point is in acceptable error degree, picks closest point
-                if(closestElevation == -1){
-                    if(curLocationToCheck.distanceTo(bestMatch) > Constants.DISTANCE_BETWEEN_VISIBLE_POINTS) {
-                        closestElevation = elevationDiffAbs;
-                        closestPoint = curLocationToCheck;
-                    }
-                }
-
-                else if(elevationDiffAbs < closestElevation){
-                    if(curLocationToCheck.distanceTo(bestMatch) > Constants.DISTANCE_BETWEEN_VISIBLE_POINTS) {
-
-                        closestElevation = elevationDiffAbs;
-                        closestPoint = curLocationToCheck;
-                    }
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                Log.i("ERROR", e.getMessage());
-            }
-
-        }
-
-        LatLng closestPointLatLng = new LatLng(closestPoint.getLatitude(), closestPoint.getLongitude());
-        MarkerOptions closestPointMarker = new MarkerOptions();
-        closestPointMarker.position(closestPointLatLng);
-        closestPointMarker.title("2nd BEST FIRE LOCATION!");
-
-
-        Marker marker = mMap.addMarker(closestPointMarker);
-
-
-
-        PolylineOptions polylineOptions = new PolylineOptions();
-        polylineOptions.add(new LatLng(startLocation.getLatitude(), startLocation.getLongitude()));
-        polylineOptions.add(closestPointLatLng);
-        polylineOptions.width(4);
-        polylineOptions.color(Color.BLUE);
-
-
-       mMap.addPolyline(polylineOptions);
-
-
-       // mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(closestPointLatLng, 10));
-       // showConversionsFragment(closestPointLatLng);
-
-    }
-*/
-
-
+    /**
+     * Figures out legal based on lat lng of clicked marker, displays this info in a ShowConversionsFragment
+     * @param conversionPoint
+     */
     private void showConversionsFragment(LatLng conversionPoint){
-        conversionsContainer = v.findViewById(R.id.conversions_container);
 
         GeoConverter geoConverter = new GeoConverter();
         FragmentManager fm = getChildFragmentManager();
@@ -751,6 +685,9 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
+    /**
+     * Shows a ShowConversionFragment when there is no conversion to show yet
+     */
     private void showConversionsFragment(){
         FragmentManager fm = getChildFragmentManager();
         showConversionsFragment = (ShowConversionsFragment) fm.findFragmentById(0);
@@ -775,6 +712,10 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
+    /**
+     * Checks if location is enabled
+     * @return
+     */
     private boolean checkLocationPermission() {
         String permission = "android.permission.ACCESS_FINE_LOCATION";
         int res = getContext().checkCallingOrSelfPermission(permission);
@@ -782,6 +723,18 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
+    /**
+     * Class to represent the location and elevation of a point
+     */
+    class Match{
+        public Location location;
+        public double elevation;
+
+        public Match(Location location, double elevation){
+            this.location = location;
+            this.elevation = elevation;
+        }
+    }
 
 
 }

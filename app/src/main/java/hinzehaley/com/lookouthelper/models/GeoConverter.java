@@ -13,6 +13,7 @@ import hinzehaley.com.lookouthelper.fragments.ShowConversionsFragment;
 
 /**
  * Created by haleyhinze on 6/22/16.
+ * Converts lat lng to legal or legal to lat lng. Displays results in a ShowConversionsFragment
  */
 public class GeoConverter {
 
@@ -45,6 +46,12 @@ public class GeoConverter {
 
     }
 
+    /**
+     * Requests the legal description of a given lat and lng
+     * @param showConversionsFragment
+     * @param lat
+     * @param lon
+     */
     public void requestLegalFromLocation(ShowConversionsFragment showConversionsFragment, double lat, double lon){
         this.showConversionsFragment = showConversionsFragment;
         this.location = new Location("");
@@ -53,41 +60,50 @@ public class GeoConverter {
 
         String url = Constants.GEOCOMMUNICATOR_DOMAIN + Constants.LAT_LON_TO_TOWNSHIP + "lat=" + lat + "&lon=" + lon + Constants.UNITS_AND_FORMAT;
 
-
         new RetrieveTextFromURL(this, true, false).execute(url);
 
     }
 
+    /**
+     * Called when a location was retrieved using a legal. Parses the location and passes
+     * it into showConversionsFragment to be displayed
+     * @param locationString
+     */
     public void retrievedLocationString(String locationString){
         location = getLocationFromJson(locationString);
         showConversionsFragment.passInNewLocation(location, legal);
     }
 
+    /**
+     * Called when a legal was retrieved using a location. Parses the legal and passes
+     * it into showConversionsFragment to be displayed
+     * @param legalString
+     */
     public void retrievedLegalString(String legalString){
         legal = getLegalFromJson(legalString);
         showConversionsFragment.passInNewLegal(location, legal);
     }
 
 
+    /**
+     * Gets the legal description from the json returned when requesting legal from lat lng
+     * @param json
+     * @return legal, or null if json could not be parsed or does not contain legal
+     */
     private String getLegalFromJson(String json){
-        Log.i("LEGAL", " xml: " + json);
         JSONObject jsonObj = null;
         try {
             jsonObj = new JSONObject(json);
-            Log.i("LEGAL", "json: " + jsonObj.toString());
         } catch (JSONException e) {
-            Log.e("JSON exception", e.getMessage());
             e.printStackTrace();
             return null;
         }
-
 
         try {
             JSONArray features = jsonObj.getJSONArray("features");
 
             if(features.length() > 0){
                 String data = features.getJSONObject(0).getJSONObject("attributes").getString("landdescription");
-                Log.i("GEOLOCATION", "data: " + data);
 
                 String[] desc = data.split("0(?=[^0])|(?<=[A-Z])(?=[1-9])");
                 for(int i = 0; i<desc.length; i++){
@@ -95,7 +111,6 @@ public class GeoConverter {
                     if(desc[i].matches("[A-Z]0*")){
                         desc[i] = desc[i].replaceAll("0", "");
                     }
-                    Log.i("GEO", "desc: " + desc[i]);
                 }
 
                 desc[8] = desc[8].replaceFirst("([^SN]*)", "");
@@ -104,9 +119,6 @@ public class GeoConverter {
                 description += "T" + desc[2] + desc[3] + " R" + desc[4] + desc[5] + " Section " + desc[7] + " " + desc[8];
                 return description;
             }
-
-
-
 
            return null;
 
@@ -117,18 +129,19 @@ public class GeoConverter {
 
     }
 
-
+    /**
+     * Gets the Location from the json returned when requesting lat lng from legal
+     * @param json
+     * @return Location, or null if json could not be parsed or does not contain lat lng
+     */
     private Location getLocationFromJson(String json){
         JSONObject jsonObj = null;
         try {
             jsonObj = new JSONObject(json);
         } catch (JSONException e) {
-            Log.e("JSON exception", e.getMessage());
             e.printStackTrace();
             return null;
         }
-
-        Log.i("GEOLOCATION", "JSON : " + jsonObj.toString());
 
         try {
             JSONArray coords = jsonObj.getJSONArray("coordinates");

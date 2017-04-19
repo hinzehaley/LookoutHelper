@@ -1,6 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/sunset2"
     tools:context="hinzehaley.com.lookouthelper.fragments.CrossLookoutFragment">
 
     <RelativeLayout
@@ -8,11 +9,12 @@
         android:layout_height="match_parent">
 
 
-            <ListView
+            <android.support.v7.widget.RecyclerView
                 android:id="@+id/lst_cross_lookouts"
+                android:background="@color/transparent"
                 android:layout_above="@+id/btn_add"
                 android:layout_width="match_parent"
-                android:layout_height="fill_parent"></ListView>
+                android:layout_height="fill_parent"></android.support.v7.widget.RecyclerView>
 
 
 
@@ -20,13 +22,10 @@
             android:id="@+id/btn_add"
             android:layout_width="match_parent"
             android:text="Add Cross Lookout"
-            android:layout_above="@+id/btn_done"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/btn_done"
-            android:layout_width="match_parent"
-            android:text="Done"
+            android:textSize="25dp"
+            android:background="@color/colorPrimary"
+            android:layout_margin="10dp"
+            android:textColor="@color/white"
             android:layout_alignParentBottom="true"
             android:layout_height="wrap_content" />
 

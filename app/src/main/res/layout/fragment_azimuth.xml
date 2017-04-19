@@ -1,7 +1,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="hinzehaley.com.lookouthelper.fragments.AzimuthFragment">
+    android:background="@color/white"
+    tools:context="hinzehaley.com.lookouthelper.fragments.InfoReportFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,6 +14,9 @@
             android:layout_height="match_parent">
 
             <LinearLayout
+                android:id="@+id/layout_main_azimuth"
+                android:clickable="true"
+                android:focusableInTouchMode="true"
                 android:layout_width="match_parent"
                 android:orientation="vertical"
                 android:layout_height="wrap_content">
@@ -24,6 +28,7 @@
 
             <CheckBox
                 android:id="@+id/checkbox_base_visible"
+                android:textSize="20dp"
                 android:hint="Base Visible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -31,6 +36,7 @@
 
             <CheckBox
                 android:id="@+id/checkbox_have_cross"
+                android:textSize="20dp"
                 android:hint="Have Cross"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -54,7 +60,6 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:hint="Degrees"
-            android:singleLine="true"
             android:imeOptions="actionNext"
             android:inputType="numberSigned"
             android:layout_height="wrap_content" />
@@ -65,7 +70,6 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:hint="Minutes"
-                        android:singleLine="true"
                         android:imeOptions="actionNext"
                         android:inputType="numberSigned"
                         android:layout_height="wrap_content" />
@@ -86,6 +90,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
+                        android:textSize="20dp"
                         android:text="Vertical azimuth only necessary with no cross. If you can't see the smoke base, take the vertical azimuth for the lowest visible part of the smoke."
                         android:layout_height="wrap_content" />
                     <LinearLayout
@@ -99,7 +104,6 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:hint="Degrees"
-                            android:singleLine="true"
                             android:imeOptions="actionNext"
                             android:inputType="numberSigned"
                             android:layout_height="wrap_content" />
@@ -110,7 +114,6 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:hint="Minutes"
-                            android:singleLine="true"
                             android:imeOptions="actionNext"
                             android:inputType="numberSigned"
                             android:layout_height="wrap_content" />
@@ -129,6 +132,7 @@
         <Spinner
             android:id="@+id/spinner_cross_lookout"
             android:layout_width="match_parent"
+            android:layout_margin="15dp"
             android:prompt="@string/cross_lookout"
             android:layout_height="wrap_content"/>
 
@@ -149,7 +153,6 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:hint="Degrees"
-                    android:singleLine="true"
                     android:imeOptions="actionNext"
                     android:inputType="numberSigned"
                     android:layout_height="wrap_content" />
@@ -160,7 +163,6 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:hint="Minutes"
-                    android:singleLine="true"
                     android:imeOptions="actionNext"
                     android:inputType="numberSigned"
                     android:layout_height="wrap_content" />
@@ -180,7 +182,6 @@
                     android:id="@+id/et_smoke_color"
                     android:layout_width="match_parent"
                     android:hint="Smoke Color"
-                    android:singleLine="true"
                     android:imeOptions="actionNext"
                     android:layout_height="wrap_content" />
 
@@ -188,7 +189,6 @@
                     android:id="@+id/et_landmark"
                     android:layout_width="match_parent"
                     android:hint="Landmark"
-                    android:singleLine="true"
                     android:imeOptions="actionNext"
                     android:layout_height="wrap_content" />
 
@@ -196,13 +196,14 @@
                     android:id="@+id/et_additional_info"
                     android:layout_width="match_parent"
                     android:hint="Additional Info"
-                    android:singleLine="true"
                     android:imeOptions="actionNext"
                     android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btn_next"
+            android:background="@color/transparent_colorPrimaryDark"
             android:text="Next"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

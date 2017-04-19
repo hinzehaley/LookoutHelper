@@ -21,12 +21,26 @@
             android:hint="Lookout Name"
             android:layout_height="wrap_content" />
 
+        <TextView
+            android:layout_marginTop="20dp"
+            android:text="Latitude in decimal degrees:"
+            android:textSize="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <EditText
             android:id="@+id/et_lookout_lat"
             android:layout_width="match_parent"
             android:textSize="25dp"
             android:inputType="numberDecimal|numberSigned"
             android:hint="Lookout Latitude"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_marginTop="20dp"
+            android:text="Longitude in decimal degrees:"
+            android:textSize="20dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <EditText
@@ -47,6 +61,10 @@
                 android:id="@+id/btn_cancel"
                 android:layout_width="0dp"
                 android:layout_weight="1"
+                android:background="@color/transparent_colorPrimaryDark"
+                android:textColor="@color/white"
+                android:elevation="10dp"
+                android:layout_margin="10dp"
                 android:text="Cancel"
                 android:layout_height="wrap_content" />
 
@@ -54,6 +72,10 @@
                 android:id="@+id/btn_save"
                 android:layout_width="0dp"
                 android:layout_weight="1"
+                android:background="@color/transparent_colorPrimaryDark"
+                android:textColor="@color/white"
+                android:elevation="10dp"
+                android:layout_margin="10dp"
                 android:text="Save"
                 android:layout_height="wrap_content" />
             </LinearLayout>
@@ -61,6 +83,10 @@
         <Button
             android:id="@+id/btn_delete"
             android:layout_width="match_parent"
+            android:background="@color/transparent_colorPrimaryDark"
+            android:textColor="@color/white"
+            android:elevation="10dp"
+            android:layout_margin="10dp"
             android:text="Delete Cross"
             android:layout_height="wrap_content" />
 

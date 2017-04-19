@@ -21,13 +21,13 @@ import android.widget.Spinner;
 
 import hinzehaley.com.lookouthelper.Constants;
 import hinzehaley.com.lookouthelper.HomeScreen;
+import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
 import hinzehaley.com.lookouthelper.models.GeoConverter;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link ConverterFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment for user to input lat lng or legal. Starts requesting conversions, which will be
+ * shown in ShowConversionsFragment.
  */
 public class ConverterFragment extends Fragment {
 
@@ -62,6 +62,13 @@ public class ConverterFragment extends Fragment {
 
     }
 
+    /**
+     * Sets up UI
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -87,22 +94,24 @@ public class ConverterFragment extends Fragment {
         return v;
     }
 
+    /**
+     * Fills in spinners for cardinal directions on legal description
+     */
     private void fillInSpinners(){
         ArrayAdapter<CharSequence> adapterTownship = ArrayAdapter.createFromResource(getContext(),
                 R.array.spinner_north_south, android.R.layout.simple_spinner_item);
-// Specify the layout to use when the list of choices appears
         adapterTownship.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-// Apply the adapter to the spinner
         spinnerTownship.setAdapter(adapterTownship);
 
         ArrayAdapter<CharSequence> adapterRange = ArrayAdapter.createFromResource(getContext(),
                 R.array.spinner_east_west, android.R.layout.simple_spinner_item);
-// Specify the layout to use when the list of choices appears
         adapterRange.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-// Apply the adapter to the spinner
         spinnerRange.setAdapter(adapterRange);
     }
 
+    /**
+     * Listens for changes to EditTexts
+     */
     private void setAllListeners(){
         setListenerEditText(etTownship);
         setListenerEditText(etRange);
@@ -112,7 +121,9 @@ public class ConverterFragment extends Fragment {
     }
 
 
-
+    /**
+     * @param et
+     */
     private void setListenerEditText(EditText et){
         et.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -122,6 +133,11 @@ public class ConverterFragment extends Fragment {
         });
     }
 
+    /**
+     * Checks if either all the fields for lat lng are entered or all fields for legal
+     * are entered
+     * @return true if all information necessary is provided for either lat lng or legal
+     */
     private boolean necessaryFieldsFull(){
         if(legalEntered()){
             return true;
@@ -132,16 +148,23 @@ public class ConverterFragment extends Fragment {
         return false;
     }
 
+    /**
+     * @param et
+     * @return true if et contains text, false if et is empty
+     */
     private boolean editTextContainsText(EditText et){
         if(et.getText() != null){
             if(!et.getText().toString().equals("")){
-                Log.i("CONTAINS TEXT:", et.getText().toString());
                 return true;
             }
         }
         return false;
     }
 
+    /**
+     * Returns true if township, range, and section are entered, false otherwise
+     * @return
+     */
     private boolean legalEntered(){
         if(editTextContainsText(etTownship) && editTextContainsText(etRange) && editTextContainsText(etSection)){
             return true;
@@ -149,6 +172,10 @@ public class ConverterFragment extends Fragment {
         return false;
     }
 
+    /**
+     * Returns true if lat and lng are entered, false otherwise
+     * @return
+     */
     private boolean latLonEntered(){
         if(editTextContainsText(etLat) && editTextContainsText(etLon)){
             return true;
@@ -156,6 +183,13 @@ public class ConverterFragment extends Fragment {
         return false;
     }
 
+    /**
+     * Makes submit button clickable if necessary fields are filled in.
+     * Listens for clicks on submit button. If clicked, uses the geoConverter
+     * to convert the entered location type into the other location type
+     * (legal -- lat lng). GeoConverter is passed an instance of showConversionsFragment
+     * to use for displaying results
+     */
     private void makeSubmitButtonClickableIfNecessary(){
         if(necessaryFieldsFull()){
             btnSubmit.setClickable(true);
@@ -167,8 +201,8 @@ public class ConverterFragment extends Fragment {
                     if(legalEntered()) {
 
                         SharedPreferences prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
-                        String state = prefs.getString(Constants.STATE_PREFERENCES_KEY, null);
-                        int principalMeridian = prefs.getInt(Constants.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1);
+                        String state = prefs.getString(PreferencesKeys.STATE_PREFERENCES_KEY, null);
+                        int principalMeridian = prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1);
                         if((state == null) || principalMeridian == -1){
                             //TODO: SHOW ERROR ASKING TO EDIT SETTINGS
                             return;
@@ -194,7 +228,10 @@ public class ConverterFragment extends Fragment {
         }
     }
 
-
+    /**
+     * Hides soft keyboard if non-edit text view is touched
+     * @param view
+     */
     public void setupUI(View view) {
 
         //Set up touch listener for non-text box views to hide keyboard.
@@ -210,7 +247,7 @@ public class ConverterFragment extends Fragment {
             });
         }
 
-        //If a layout container, iterate over children and seed recursion.
+        //If a layout container, iterate over children
         if (view instanceof ViewGroup) {
 
             for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
@@ -228,8 +265,5 @@ public class ConverterFragment extends Fragment {
             inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         }
     }
-
-
-
 
 }

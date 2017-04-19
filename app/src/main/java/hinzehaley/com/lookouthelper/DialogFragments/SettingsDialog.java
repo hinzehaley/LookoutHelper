@@ -1,9 +1,10 @@
 package hinzehaley.com.lookouthelper.DialogFragments;
 
-
-import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v4.app.DialogFragment;
@@ -12,15 +13,18 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import hinzehaley.com.lookouthelper.Constants;
+import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
+
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,16 +41,26 @@ public class SettingsDialog extends DialogFragment {
     private Button btnDone;
     private Button btnCancel;
     ArrayAdapter<CharSequence> adapterStates;
+    LinearLayout mainLayout;
 
     public SettingsDialog() {
         // Required empty public constructor
     }
 
 
+    /**
+     * Gets view references and fills in fields that we have stored information
+     * for.
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         v = inflater.inflate(R.layout.fragment_settings_dialog, container, false);
         spinnerState = (Spinner) v.findViewById(R.id.spinner_state);
         etElevation = (EditText) v.findViewById(R.id.et_lookout_elevation);
@@ -56,7 +70,6 @@ public class SettingsDialog extends DialogFragment {
         btnDone = (Button) v.findViewById(R.id.btn_save_settings);
         btnCancel = (Button) v.findViewById(R.id.btn_cancel_settings);
         fillInSpinners();
-        setUpEditTexts();
         prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
         fillInCompletedFields();
 
@@ -75,30 +88,50 @@ public class SettingsDialog extends DialogFragment {
             }
         });
 
+        mainLayout = (LinearLayout) v.findViewById(R.id.main_layout);
+
+        //Hides soft keyboard if user clicks on the dialog -- so they can reach relevant buttons
+        mainLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+                return true;
+            }
+        });
+
 
         return v;
     }
 
 
+    /**
+     * Fills in fields that are already saved in SharedPreferences
+     */
     private void fillInCompletedFields(){
-        if(prefs.getString(Constants.STATE_PREFERENCES_KEY, null) != null){
-            spinnerState.setSelection(adapterStates.getPosition(prefs.getString(Constants.STATE_PREFERENCES_KEY, null)));
+        if(prefs.getString(PreferencesKeys.STATE_PREFERENCES_KEY, null) != null){
+            spinnerState.setSelection(adapterStates.getPosition(prefs.getString(PreferencesKeys.STATE_PREFERENCES_KEY, null)));
         }
-        if(prefs.getFloat(Constants.LOOKOUT_LAT_PREFERENCES_KEY, 0) != 0){
-            etLat.setText("" + prefs.getFloat(Constants.LOOKOUT_LAT_PREFERENCES_KEY, 0));
+        if(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0) != 0){
+            etLat.setText("" + prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0));
         }
-        if(prefs.getFloat(Constants.LOOKOUT_LON_PREFERENCES_KEY, 0) != 0){
-            etLon.setText(""+prefs.getFloat(Constants.LOOKOUT_LON_PREFERENCES_KEY, 0));
+        if(prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0) != 0){
+            etLon.setText(""+prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0));
         }
-        if(prefs.getFloat(Constants.LOOKOUT_ELEVATION_PREFERENCES_KEY, -1) != -1){
-            etElevation.setText(""+prefs.getFloat(Constants.LOOKOUT_ELEVATION_PREFERENCES_KEY, 0));
+        if(prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, -1) != -1){
+            etElevation.setText(""+prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, 0));
         }
-        if(prefs.getInt(Constants.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1) != -1){
-            etPrincipalMeridian.setText(""+prefs.getInt(Constants.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, 0));
+        if(prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1) != -1){
+            etPrincipalMeridian.setText(""+prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, 0));
         }
     }
 
-    //TODO: add else checks to see if valid....
+
+
+    /**
+     * Saves information into SharedPreferences
+     */
+    //TODO: add else checks to see if valid input
     private void saveSettings(){
         String state = spinnerState.getSelectedItem().toString();
         Log.i("Saving preferences", "state is : " + state);
@@ -106,28 +139,36 @@ public class SettingsDialog extends DialogFragment {
 
         if(state != null){
             if(!state.equals("")){
-                prefsEditor.putString(Constants.STATE_PREFERENCES_KEY, state);
+                prefsEditor.putString(PreferencesKeys.STATE_PREFERENCES_KEY, state);
             }
         }
         if(containsLatLng(etLat)) {
             Float latitude = Float.parseFloat(etLat.getText().toString());
-            prefsEditor.putFloat(Constants.LOOKOUT_LAT_PREFERENCES_KEY, latitude);
+            prefsEditor.putFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, latitude);
         }
         if(containsLatLng(etLon)) {
             Float longitude = Float.parseFloat(etLon.getText().toString());
-            prefsEditor.putFloat(Constants.LOOKOUT_LON_PREFERENCES_KEY, longitude);
+            prefsEditor.putFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, longitude);
         }
         if(containsDecimal(etElevation)) {
             Float elevation = Float.parseFloat(etElevation.getText().toString());
-            prefsEditor.putFloat(Constants.LOOKOUT_ELEVATION_PREFERENCES_KEY, elevation);
+            prefsEditor.putFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, elevation);
         }
         if(containsInt(etPrincipalMeridian)) {
             int principalMeridian = Integer.parseInt(etPrincipalMeridian.getText().toString());
-            prefsEditor.putInt(Constants.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, principalMeridian);
+            prefsEditor.putInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, principalMeridian);
         }
         prefsEditor.commit();
     }
 
+    /**
+     * Does regex matching to see if the et contains a valid lat lng.
+     * Currently this only checks whether the et contains only decimals, colons, and numbers
+     * does not verify that the decimal is within an acceptable range
+     * for lat lng
+     * @param et
+     * @return
+     */
     private boolean containsLatLng(EditText et){
         if(containsText(et)){
             String text = et.getText().toString();
@@ -138,6 +179,11 @@ public class SettingsDialog extends DialogFragment {
         return false;
     }
 
+    /**
+     * Ensures that et contains only numbers and a decimal
+     * @param et
+     * @return
+     */
     private boolean containsDecimal(EditText et){
         if(containsText(et)){
             String text = et.getText().toString();
@@ -148,6 +194,11 @@ public class SettingsDialog extends DialogFragment {
         return false;
     }
 
+    /**
+     * Checks to make sure et contains only numbers
+     * @param et
+     * @return
+     */
     private boolean containsInt(EditText et){
         if(containsText(et)){
             String text = et.getText().toString();
@@ -158,6 +209,12 @@ public class SettingsDialog extends DialogFragment {
         return false;
     }
 
+    /**
+     * Checks to make sure et is not empty
+     *
+     * @param et
+     * @return
+     */
     private boolean containsText(EditText et){
         if(et.getText() != null){
             if(!et.getText().toString().equals("")){
@@ -168,27 +225,27 @@ public class SettingsDialog extends DialogFragment {
     }
 
 
+    /**
+     * Fills in the spinner containing state names
+     */
     private void fillInSpinners() {
         adapterStates = ArrayAdapter.createFromResource(getContext(),
                 R.array.states, android.R.layout.simple_spinner_item);
-// Specify the layout to use when the list of choices appears
         adapterStates.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-// Apply the adapter to the spinner
         spinnerState.setAdapter(adapterStates);
     }
 
-    private void setUpEditTexts(){
-        addNextButtonToEditText(etElevation);
-        addNextButtonToEditText(etLat);
-        addNextButtonToEditText(etLon);
-        addNextButtonToEditText(etPrincipalMeridian);
+    /**
+     * Sets size of SettingsDialog and makes background transparent
+     */
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT );
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
     }
-
-    private void addNextButtonToEditText(EditText et){
-        et.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-    }
-
-
-
-
 }

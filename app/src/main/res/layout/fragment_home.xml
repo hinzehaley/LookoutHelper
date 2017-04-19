@@ -1,25 +1,43 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/sunset2"
     tools:context="hinzehaley.com.lookouthelper.fragments.HomeFragment">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_height="match_parent">
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="20dp"
+        android:layout_height="wrap_content">
 
         <Button
             android:id="@+id/btn_report"
             android:text="Report Fire"
+            android:background="@color/transparent_gray"
+            android:textColor="@color/white"
+            android:textSize="30dp"
+            android:padding="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
+            android:elevation="10dp"
             android:layout_height="wrap_content" />
 
        <Button
+           android:layout_below="@+id/btn_report"
            android:id="@+id/btn_converter"
            android:text="@string/converter"
+           android:background="@color/transparent_gray"
+           android:textColor="@color/white"
+           android:textSize="30dp"
+           android:padding="10dp"
+           android:layout_marginBottom="10dp"
+           android:layout_marginTop="10dp"
+           android:gravity="center"
+           android:elevation="10dp"
            android:layout_width="match_parent"
            android:layout_height="wrap_content" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </FrameLayout>

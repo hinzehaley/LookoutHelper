@@ -13,8 +13,12 @@
     <string name = "could_not_parse_location">Unable to get coordinates. Please ensure the legal entered is valid</string>
     <string name="could_not_parse_coordinates">Unable to get legal. Please ensure the coordinates are the correct format and the point you are converting is not located in water.</string>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="higher">higher</string>
+    <string name="lower">lower</string>
+    <string name="this_point_is">This point is</string>
+    <string name="meters">meters</string>
+    <string name="than_it_should_be">\nthan it should be based on the given \nvertical angle</string>
+    <string name="guess_num">Guess #</string>
 
 
     <string-array name="spinner_north_south">

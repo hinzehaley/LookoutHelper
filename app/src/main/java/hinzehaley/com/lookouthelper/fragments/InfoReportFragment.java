@@ -6,8 +6,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -23,14 +24,15 @@ import java.util.ArrayList;
 
 import hinzehaley.com.lookouthelper.Constants;
 import hinzehaley.com.lookouthelper.HomeScreen;
+import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
+
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link AzimuthFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment for inputting information about a smoke
  */
-public class AzimuthFragment extends Fragment {
+public class InfoReportFragment extends Fragment {
 
     private CheckBox checkboxBaseVisible;
     private CheckBox checkboxHaveCross;
@@ -49,6 +51,8 @@ public class AzimuthFragment extends Fragment {
     private Button btnNext;
     private View v;
 
+    private LinearLayout mainLayout;
+
 
 
     /**
@@ -56,17 +60,25 @@ public class AzimuthFragment extends Fragment {
      * this fragment using the provided parameters.
      *
 
-     * @return A new instance of fragment AzimuthFragment.
+     * @return A new instance of fragment InfoReportFragment.
      */
-    public static AzimuthFragment newInstance() {
-        AzimuthFragment fragment = new AzimuthFragment();
+    public static InfoReportFragment newInstance() {
+        InfoReportFragment fragment = new InfoReportFragment();
         return fragment;
     }
 
-    public AzimuthFragment() {
+    public InfoReportFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Gets references to view items, listens for checkbox clicks to change view if
+     * necessary, populates spinners
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -75,6 +87,9 @@ public class AzimuthFragment extends Fragment {
         getViewReferences();
         setCheckboxListeners();
         populateSpinner();
+
+        //Checks if connected to network. If not, shows error message. Otherwise proceeds
+        //to the map fragment
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -88,9 +103,28 @@ public class AzimuthFragment extends Fragment {
             }
         });
 
+        //Hides soft keyboard when user clicks off of an EditText
+        mainLayout = (LinearLayout) v.findViewById(R.id.layout_main_azimuth);
+        mainLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+                return true;
+            }
+        });
+
+
+        //Makes back button visible in toolbar
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         return v;
     }
 
+    /**
+     * gets references to view items
+     */
     private void getViewReferences(){
         checkboxBaseVisible = (CheckBox) v.findViewById(R.id.checkbox_base_visible);
         checkboxHaveCross = (CheckBox) v.findViewById(R.id.checkbox_have_cross);
@@ -109,6 +143,10 @@ public class AzimuthFragment extends Fragment {
         btnNext = (Button) v.findViewById(R.id.btn_next);
     }
 
+    /**
+     * Listens for checkbox clicks and alters view as necessary when
+     * checkbox is selected or de-selected
+     */
     private void setCheckboxListeners(){
         checkboxHaveCross.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,6 +162,9 @@ public class AzimuthFragment extends Fragment {
         });
     }
 
+    /**
+     * Populates spinner with the names of all cross lookouts stored in SharedPreferences
+     */
     private void populateSpinner(){
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item) {
 
@@ -133,7 +174,7 @@ public class AzimuthFragment extends Fragment {
                 View v = super.getView(position, convertView, parent);
                 if (position == getCount()) {
                     ((TextView)v.findViewById(android.R.id.text1)).setText("");
-                    ((TextView)v.findViewById(android.R.id.text1)).setHint(getItem(getCount())); //"Hint to be displayed"
+                    ((TextView)v.findViewById(android.R.id.text1)).setHint(getItem(getCount()));
                 }
 
                 return v;
@@ -141,7 +182,7 @@ public class AzimuthFragment extends Fragment {
 
             @Override
             public int getCount() {
-                return super.getCount()-1; // you dont display last item. It is used as hint.
+                return super.getCount()-1; // Last item used as hint
             }
 
         };
@@ -149,12 +190,13 @@ public class AzimuthFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 
+        // gets lookout names from SharedPreferences and adds them to adapter
         SharedPreferences prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
         ArrayList<String> lookoutNames = new ArrayList();
         boolean gettingLookouts = true;
         int lookoutNumber = 0;
         while(gettingLookouts){
-            String lookoutKey = Constants.CROSS_LOOKOUT_PREFERENCES_KEY + lookoutNumber;
+            String lookoutKey = PreferencesKeys.CROSS_LOOKOUT_PREFERENCES_KEY + lookoutNumber;
             String lookoutName = prefs.getString(lookoutKey, null);
             if(lookoutName != null){
                 lookoutNames.add(lookoutName);
@@ -165,7 +207,7 @@ public class AzimuthFragment extends Fragment {
             lookoutNumber += 1;
         }
 
-        adapter.add("--Cross Lookout--");
+        adapter.add(Constants.CROSS_LOOKOUT_HINT);
 
         spinnerCrossLookout.setAdapter(adapter);
         spinnerCrossLookout.setSelection(adapter.getCount()); //display hint
@@ -173,6 +215,9 @@ public class AzimuthFragment extends Fragment {
 
     }
 
+    /**
+     * Proceeds to map fragment
+     */
     private void goToMapFragment(){
 
         hideSoftKeyboard(getActivity());
@@ -180,10 +225,6 @@ public class AzimuthFragment extends Fragment {
         Float horizontalAzimuth = convertDegreesMinutesToFloat(getIntFromEt(etHorizontalAzimuthDegrees), getIntFromEt(etHorizontalAzimuthMintues));
         Float verticalAzimuth = convertDegreesMinutesToFloat(getIntFromEt(etVerticalAzimuthDegrees), getIntFromEt(etVerticalAzimuthMinutes));
         Float crossHorizontalAzimuth = convertDegreesMinutesToFloat(getIntFromEt(etCrossHorizontalAzimuthDegrees), getIntFromEt(etCrossHorizontalAzimuthMinutes));
-
-
-        Log.i("BUG", "going to map fragment with vert azimuth : " + verticalAzimuth);
-
 
         MapReportFragment mapReportFragment = MapReportFragment.newInstance(checkboxBaseVisible.isChecked(), checkboxHaveCross.isChecked(),
                 horizontalAzimuth, verticalAzimuth, spinnerCrossLookout.getSelectedItem().toString(), crossHorizontalAzimuth,
@@ -200,30 +241,39 @@ public class AzimuthFragment extends Fragment {
         }
     }
 
+    /**
+     *
+     * @param et
+     * @return int if et contains int, 0 otherwise
+     */
     private int getIntFromEt(EditText et){
         if(containsInt(et)) {
-            Log.i("BUG", "contains int! et text is : " + et.getText().toString());
             return Integer.parseInt(et.getText().toString());
         }else{
-            Log.i("BUG", "DOES NOT contain int! et text is : " + et.getText().toString());
             return 0;
         }
     }
 
+    /**
+     * Converts degrees and minutes from azimuth or vertical angle into a float representation
+     * @param degrees
+     * @param minutes
+     * @return
+     */
     private Float convertDegreesMinutesToFloat(int degrees, int minutes){
 
         if(degrees < 0 && minutes >= 0){
             minutes = -minutes;
         }
 
-        Log.i("BUG", "degrees : " + degrees + ", minutes: " + minutes);
-
-
         float decimalDegrees = (float) (minutes/60.0);
         return degrees + decimalDegrees;
     }
 
-
+    /**
+     * @param et
+     * @return true if et contains int, false otherwise
+     */
     private boolean containsInt(EditText et){
         if(containsText(et)){
             String text = et.getText().toString();
@@ -234,6 +284,11 @@ public class AzimuthFragment extends Fragment {
         return false;
     }
 
+    /**
+     *
+     * @param et
+     * @return true if et contains some text, false if empty
+     */
     private boolean containsText(EditText et){
         if(et.getText() != null){
             if(!et.getText().toString().equals("")){
