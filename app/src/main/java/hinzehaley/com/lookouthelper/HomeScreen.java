@@ -26,15 +26,11 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /*
 TODO:
 If user doesn't enter lat and long for a lookout, show error. Right now it crashes.
-Make it so user can click point along line and get elevation difference, lat, long, legal for that point -- works now, just clean it up a bit
-Make it so user can change map type
 Test cross feature
 See if I can make soft keyboard data entry better... Digits only for lat lng, but some way of separating h m s?
 Add a good tutorial
-Make everything prettier
-Test it all somehow...
-Maybe make feature for when fire is behind a ridge....? Ehh... probably not.
-Possibly mess with database stuff and logins (but probably not...)
+UI improvements
+Test it all
 Store reported fires -- make it possible to update them?
 
  */
