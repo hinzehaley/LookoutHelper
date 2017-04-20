@@ -7,16 +7,33 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="vertical"
-        android:weightSum="5"
+        android:weightSum="13"
         android:layout_height="match_parent">
+
+        <Spinner
+            android:id="@+id/spinner_map_type"
+            android:layout_width="match_parent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            style="@android:style/Widget.Holo.Spinner"
+            android:gravity="center_horizontal"
+            android:spinnerMode="dropdown"
+            android:background="@color/gray"
+            android:prompt="@string/map_type"
+            />
+
    <RelativeLayout
        android:id="@+id/map_container"
        android:layout_width="match_parent"
        android:layout_height="0dp"
-       android:layout_weight="3">
+       android:layout_weight="7">
 
    </RelativeLayout>
 
@@ -24,26 +41,13 @@
             android:id="@+id/conversions_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2">
+            android:layout_weight="5">
 
         </RelativeLayout>
 
     </LinearLayout>
 
-        <Spinner
-            android:id="@+id/spinner_map_type"
-            android:layout_width="200dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_height="wrap_content"
-            style="@android:style/Widget.Holo.Spinner"
-            android:gravity="center_horizontal"
-            android:spinnerMode="dropdown"
-            android:background="@color/gray"
-            android:prompt="@string/map_type"
-            />
+
 
 
     </RelativeLayout>
