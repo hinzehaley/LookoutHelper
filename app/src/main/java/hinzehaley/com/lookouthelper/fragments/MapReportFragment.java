@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -15,7 +16,10 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -93,7 +97,11 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     ShowConversionsFragment showConversionsFragment;
     private SharedPreferences prefs;
 
+    private Spinner mapTypeSpinner;
+    private int mapType = 1;
+
     ArrayList<Match> matches = new ArrayList<Match>();
+    String[] mapTypes = new String[4];
 
 
     /**
@@ -168,9 +176,53 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         }
         showConversionsFragment();
         initilizeMap();
+
+
+        mapTypes = new String[4];
+        mapTypes[0] = "Satellite Map";
+        mapTypes[1] = "Road Map";
+        mapTypes[2] = "Terrain Map";
+        mapTypes[3] = "Hybrid Map";
         return v;
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mapTypeSpinner = (Spinner) view.findViewById(R.id.spinner_map_type);
+
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getContext(),
+                R.layout.spinner_item, mapTypes);
+        dataAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        mapTypeSpinner.setAdapter(dataAdapter);
+        mapTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                mapType = position;
+                updateMapType();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+
+            }
+        });
+    }
+
+    private void updateMapType(){
+        if (mapType == 0){
+            mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        } if (mapType == 1){
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        } if (mapType == 2){
+            mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        } if (mapType == 3){
+            mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        }
+    }
 
     /**
      * Initializes map
@@ -201,7 +253,7 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(final GoogleMap map) {
         mMap = map;
-        map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        updateMapType();
 
         //Shows user location
         if(checkLocationPermission()) {
