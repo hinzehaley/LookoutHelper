@@ -778,6 +778,15 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             marker.icon(BitmapDescriptorFactory.defaultMarker(hsv[0]));
             mMap.addMarker(marker);
 
+            //Draws line from lookout to estimated points
+            PolylineOptions polylineOptions = new PolylineOptions();
+            polylineOptions.add(new LatLng(startLocation.getLatitude(), startLocation.getLongitude()));
+            polylineOptions.add(latLng);
+            polylineOptions.width(4);
+            polylineOptions.geodesic(true);
+            polylineOptions.color(Color.BLACK);
+            mMap.addPolyline(polylineOptions);
+
 
 
             if(i == 0) {
@@ -785,15 +794,8 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
                 showConversionsFragment(latLng);
             }
         }
-        //Draws line from lookout to estimated points
-        PolylineOptions polylineOptions = new PolylineOptions();
-        polylineOptions.add(new LatLng(startLocation.getLatitude(), startLocation.getLongitude()));
-        polylineOptions.add(calculateLinePoint(200000, horizontalAzimuth, new LatLng(lookoutLocation.getLatitude(), lookoutLocation.getLongitude())));
-        polylineOptions.width(4);
-        polylineOptions.geodesic(true);
-        polylineOptions.color(Color.BLUE);
 
-        mMap.addPolyline(polylineOptions);
+
     }
 
     private void getElevationOfPoint(LatLng point){
