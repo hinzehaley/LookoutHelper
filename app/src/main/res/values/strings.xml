@@ -21,6 +21,7 @@
     <string name="than_it_should_be">than it should be based on the \ngiven vertical angle</string>
     <string name="guess_num">Guess #</string>
     <string name="map_type">--Map Type--</string>
+    <string name="no_legal">No legal available for this location</string>
 
 
     <string-array name="spinner_north_south">

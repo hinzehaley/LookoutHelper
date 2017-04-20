@@ -137,6 +137,9 @@ public class ShowConversionsFragment extends Fragment {
             txtLatSeconds.setText(getString(R.string.lat) + strLatitude);
             txtLonSeconds.setText(getString(R.string.lon) + strLongitude);
 
+            if(legal.equals("")){
+                legal = getString(R.string.no_legal);
+            }
             txtLegal.setText(legal.toUpperCase());
 
         }
