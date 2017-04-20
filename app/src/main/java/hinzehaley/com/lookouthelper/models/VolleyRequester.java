@@ -87,4 +87,58 @@ public class VolleyRequester {
         stringRequest.setShouldCache(false);
     queue.add(stringRequest);
 }
+
+    public void requestSingleElevation(double lat, double lon, final MapReportFragment callerFragment, Context context){
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(15);
+
+        String startLatStr = df.format(lat);
+        String startLonStr = df.format(lon);
+
+        String url = "https://maps.googleapis.com/maps/api/elevation/json?locations=" + startLatStr + "," + startLonStr + "&key=" + context.getString(R.string.google_elevation_key);
+        // Instantiate the RequestQueue.
+        if(queue == null) {
+            queue = Volley.newRequestQueue(context);
+        }
+
+
+        // Request a string response from the provided URL. Passes reponse into callerFragment
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray arr = jsonObject.getJSONArray("results");
+                            callerFragment.singleElevationRetrieved(arr);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        // Display the first 500 characters of the response string.
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("VOLLEY", "error response is: " + error.getMessage());
+
+                //TODO: handle error response
+                callerFragment.singleElevationRetrieved(null);
+
+            }
+        });
+
+        //15000 milliseconds to timeout
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                15000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        // Add the request to the RequestQueue. Does not cache results
+        stringRequest.setShouldCache(false);
+        queue.add(stringRequest);
+
+    }
 }

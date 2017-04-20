@@ -65,6 +65,12 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     private static final String VERTICAL_AZIMUTH = "verticalAzimuth";
     private static final String CROSS_AZIMUTH = "crossAzimuth";
 
+    private MarkerOptions curClickMarkerOptions;
+    private Marker curClickMarker;
+    private VolleyRequester volleyRequester;
+
+    private Location lookoutLocation;
+
 
     boolean[] retrievalArray = new boolean[Constants.NUM_ELEVATION_REQUESTS];
     private ArrayList<JSONArray> resultArrays = new ArrayList<>(Constants.NUM_ELEVATION_REQUESTS);
@@ -86,6 +92,8 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap mMap;
     ShowConversionsFragment showConversionsFragment;
     private SharedPreferences prefs;
+
+    ArrayList<Match> matches = new ArrayList<Match>();
 
 
     /**
@@ -191,7 +199,7 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
      * @param map
      */
     @Override
-    public void onMapReady(GoogleMap map) {
+    public void onMapReady(final GoogleMap map) {
         mMap = map;
         map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
@@ -248,6 +256,53 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+        //listens for map clicks
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                LatLng nearestPointOnLine = findNearestLinePoint(latLng, horizontalAzimuth);
+                if(curClickMarker != null) {
+                    curClickMarker.remove();
+                }
+                    //Creates marker showing fire location
+                    curClickMarkerOptions = new MarkerOptions();
+                    curClickMarkerOptions.position(nearestPointOnLine);
+                    curClickMarkerOptions.title("Clicked location");
+                    curClickMarkerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
+
+                    curClickMarker = mMap.addMarker(curClickMarkerOptions);
+                    showConversionsFragment(nearestPointOnLine);
+                    getElevationOfPoint(nearestPointOnLine);
+
+
+            }
+        });
+
+    }
+
+    /**
+     * finds the point on the line that is nearest to clickedPoint
+     *
+     * @param clickedPoint
+     * @return LatLng nearestLinePoint
+     */
+    private LatLng findNearestLinePoint(LatLng clickedPoint, float horizontalAzimuth){
+        double distance = findDistanceToPoint(clickedPoint);
+        return calculateLinePoint((float)distance, horizontalAzimuth,  new LatLng(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0),
+                prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0)));
+    }
+
+    /**
+     * finds the distance to a point from the lookout location
+     *
+     * @param point
+     * @return double distance
+     */
+    private double findDistanceToPoint(LatLng point){
+        double distance = com.google.maps.android.SphericalUtil.computeDistanceBetween(
+                new LatLng(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0),
+                        prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0)), point);
+        return distance;
     }
 
 
@@ -361,10 +416,14 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
      * Has to break this information into multiple requests.
      */
     private void noCrossVisibleBase(){
-        LatLng startLocation = new LatLng(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0), prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0));
+        lookoutLocation = new Location("");
+        lookoutLocation.setLatitude(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0));
+        lookoutLocation.setLongitude(prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0));
+
+        LatLng startLocation = new LatLng(lookoutLocation.getLatitude(), lookoutLocation.getLongitude());
         boolean closestPointRetrieved = false;
         LatLng closestPoint = startLocation;
-        VolleyRequester volleyRequester = new VolleyRequester();
+        volleyRequester = new VolleyRequester();
         Arrays.fill(retrievalArray, Boolean.FALSE);
         int distAddition = (Constants.MAX_ELEVATOIN_REQUEST_DISTANCE - Constants.START_ELEVATION_REQUEST_DISTANCE)/Constants.NUM_ELEVATION_REQUESTS;
         for(int i = 0; i<Constants.NUM_ELEVATION_REQUESTS; i++){
@@ -395,6 +454,73 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             calculateBestMatch();
         }
 
+    }
+
+    public void singleElevationRetrieved(JSONArray results){
+        if(results != null && curClickMarker != null && results.length() > 0){
+
+            try {
+                JSONObject elevationObj = results.getJSONObject(0);
+                double elevation = elevationObj.getDouble("elevation");
+                JSONObject locationObj = elevationObj.getJSONObject("location");
+                double lat = locationObj.getDouble("lat");
+                double lng = locationObj.getDouble("lng");
+
+                Location clickLocation = new Location("");
+                clickLocation.setLatitude(lat);
+                clickLocation.setLongitude(lng);
+
+                //in meters
+                double len = lookoutLocation.distanceTo(clickLocation);
+                double radiansOnLine = Math.toRadians(verticalAzimuth);
+                double tanOnLine = Math.tan(radiansOnLine);
+                double heightDiff = len * tanOnLine;
+
+                //elevation in feet, convert to meters
+                double lookoutElevation = prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, 0);
+                lookoutElevation = footToMeter(lookoutElevation);
+
+                double targetElevation = lookoutElevation + heightDiff;
+                Log.i("CLICKED INFO", "Target elevation is: " + targetElevation);
+                Log.i("CLICKED INFO", "Lookout Elevation = " + lookoutElevation + " , heightDiff is: " + heightDiff);
+
+                //Gets difference between target elevation and actual elevation
+                double elevationDiffAbs = Math.abs(targetElevation - elevation);
+                double elevationDiff = elevation - targetElevation;
+
+                String descriptor = getString(R.string.higher);
+                if(elevationDiff < 0){
+                    descriptor = getString(R.string.lower);
+                }
+
+                String snippet =  getString(R.string.this_point_is) + " " + (String.format( "%.2f", Math.abs(elevationDiff))) + " " + getString(R.string.meters) +
+                        "(" + String.format( "%.2f", meterToFoot(Math.abs(elevationDiff))) + " " + getString(R.string.feet)+ ")\n"
+                        + descriptor + " " + getString(R.string.than_it_should_be);
+
+                if(curClickMarker != null) {
+                    curClickMarker.remove();
+                }
+                curClickMarkerOptions.snippet(snippet);
+                curClickMarkerOptions.position(new LatLng(lat, lng));
+                curClickMarker = mMap.addMarker(curClickMarkerOptions);
+                curClickMarker.showInfoWindow();
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+
+        }
+    }
+
+
+    public static double footToMeter(double foot){
+        return foot * 0.3048;
+    }
+    public static double meterToFoot(double meter){
+        return meter / 0.3048;
     }
 
     /**
@@ -477,7 +603,8 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
     //TODO: make sure closest location is visible... Location could be hidden by a ridge
     private ArrayList<Match> calculateBestMatch(){
         concatAllArrays();
-        ArrayList<Match> matches = new ArrayList<Match>();
+
+        matches.clear();
 
         //Starts at lookout
         Location startLocation = new Location("");
@@ -509,6 +636,8 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
                     Location curLocationToCheck = new Location("");
                     curLocationToCheck.setLatitude(lat);
                     curLocationToCheck.setLongitude(lon);
+
+                    //in meters
                     double len = startLocation.distanceTo(curLocationToCheck);
                     double radiansOnLine = Math.toRadians(verticalAzimuth);
                     double tanOnLine = Math.tan(radiansOnLine);
@@ -517,7 +646,11 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
                     double heightDiff = len * tanOnLine;
                     double errorHeightDiff = len * tanDegreeOfError;
                     double maxAcceptableErrorDiff = Math.abs(heightDiff - errorHeightDiff);
+
+                    //int feet, change to meters
                     double lookoutElevation = prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, 0);
+                    lookoutElevation = footToMeter(lookoutElevation);
+
                     double targetElevation = lookoutElevation + heightDiff;
 
                     //Gets difference between target elevation and actual elevation
@@ -631,7 +764,8 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
                 descriptor = getString(R.string.lower);
             }
             String snippet = getString(R.string.this_point_is) + " " + (String.format( "%.2f", Math.abs(elevationDiff))) + " " + getString(R.string.meters) +
-                    " " + descriptor + getString(R.string.than_it_should_be);
+                    "(" + String.format( "%.2f", meterToFoot(Math.abs(elevationDiff))) + " " + getString(R.string.feet)+ ")\n"
+                    + descriptor + " " + getString(R.string.than_it_should_be);
 
             MarkerOptions marker = new MarkerOptions();
             marker.position(latLng);
@@ -644,20 +778,29 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             marker.icon(BitmapDescriptorFactory.defaultMarker(hsv[0]));
             mMap.addMarker(marker);
 
-            //Draws line from lookout to estimated points
-            PolylineOptions polylineOptions = new PolylineOptions();
-            polylineOptions.add(new LatLng(startLocation.getLatitude(), startLocation.getLongitude()));
-            polylineOptions.add(latLng);
-            polylineOptions.width(4);
-            polylineOptions.color(Color.BLUE);
 
-            mMap.addPolyline(polylineOptions);
 
             if(i == 0) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
                 showConversionsFragment(latLng);
             }
         }
+        //Draws line from lookout to estimated points
+        PolylineOptions polylineOptions = new PolylineOptions();
+        polylineOptions.add(new LatLng(startLocation.getLatitude(), startLocation.getLongitude()));
+        polylineOptions.add(calculateLinePoint(200000, horizontalAzimuth, new LatLng(lookoutLocation.getLatitude(), lookoutLocation.getLongitude())));
+        polylineOptions.width(4);
+        polylineOptions.geodesic(true);
+        polylineOptions.color(Color.BLUE);
+
+        mMap.addPolyline(polylineOptions);
+    }
+
+    private void getElevationOfPoint(LatLng point){
+        if(volleyRequester == null){
+            volleyRequester = new VolleyRequester();
+        }
+        volleyRequester.requestSingleElevation(point.latitude, point.longitude, this, getContext());
     }
 
 
@@ -681,8 +824,6 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         geoConverter.requestLegalFromLocation(showConversionsFragment,
                 Location.convert(String.valueOf(conversionPoint.latitude)),
                 Location.convert(String.valueOf(conversionPoint.longitude)));
-
-
     }
 
     /**
@@ -728,8 +869,15 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
      */
     class Match{
         public Location location;
+
+        //in meters
         public double elevation;
 
+        /**
+         *
+         * @param location
+         * @param elevation in meters
+         */
         public Match(Location location, double elevation){
             this.location = location;
             this.elevation = elevation;

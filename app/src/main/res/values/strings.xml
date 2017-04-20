@@ -16,8 +16,9 @@
     <string name="higher">higher</string>
     <string name="lower">lower</string>
     <string name="this_point_is">This point is</string>
+    <string name="feet">feet</string>
     <string name="meters">meters</string>
-    <string name="than_it_should_be">\nthan it should be based on the given \nvertical angle</string>
+    <string name="than_it_should_be">than it should be based on the \ngiven vertical angle</string>
     <string name="guess_num">Guess #</string>
 
 

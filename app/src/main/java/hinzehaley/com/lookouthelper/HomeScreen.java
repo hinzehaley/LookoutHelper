@@ -26,7 +26,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 /*
 TODO:
 If user doesn't enter lat and long for a lookout, show error. Right now it crashes.
-Make it so user can click point along line and get elevation difference, lat, long, legal for that point
+Make it so user can click point along line and get elevation difference, lat, long, legal for that point -- works now, just clean it up a bit
 Make it so user can change map type
 Test cross feature
 See if I can make soft keyboard data entry better... Digits only for lat lng, but some way of separating h m s?

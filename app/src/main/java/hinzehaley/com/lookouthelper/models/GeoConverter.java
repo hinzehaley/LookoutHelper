@@ -113,10 +113,15 @@ public class GeoConverter {
                     }
                 }
 
-                desc[8] = desc[8].replaceFirst("([^SN]*)", "");
-
+                String quarterSec = "";
+                if(desc.length >= 9) {
+                    desc[8] = desc[8].replaceFirst("([^SN]*)", "");
+                    quarterSec = desc[8];
+                }
                 String description = "";
-                description += "T" + desc[2] + desc[3] + " R" + desc[4] + desc[5] + " Section " + desc[7] + " " + desc[8];
+                if(desc.length >= 8) {
+                    description += "T" + desc[2] + desc[3] + " R" + desc[4] + desc[5] + " Section " + desc[7] + " " + quarterSec;
+                }
                 return description;
             }
 
