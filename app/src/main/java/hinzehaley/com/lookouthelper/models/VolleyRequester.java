@@ -29,7 +29,7 @@ public class VolleyRequester {
     static RequestQueue queue = null;
 
 
-    public void requestElevation(double startLat, double startLon, double endLat, double endLon, final Context context, final MapReportFragment callerFragment, int numSamples, final int resultNum) {
+    public void requestMultipleElevations(double startLat, double startLon, double endLat, double endLon, final Context context, final MapReportFragment callerFragment, int numSamples, final int resultNum) {
 
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(15);
@@ -41,7 +41,6 @@ public class VolleyRequester {
 
         //Builds request URLs
         String urlPath = "https://maps.googleapis.com/maps/api/elevation/json?path=" + startLatStr + "," + startLonStr + "|" + endLatStr + "," + endLonStr + "&samples=" + numSamples + "&key=" + context.getString(R.string.google_elevation_key);
-        String url = "https://maps.googleapis.com/maps/api/elevation/json?locations=" + startLatStr + "," + startLonStr + "&key=" + context.getString(R.string.google_elevation_key);
 
         // Instantiate the RequestQueue.
         if(queue == null) {

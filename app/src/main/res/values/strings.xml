@@ -22,6 +22,8 @@
     <string name="guess_num">Guess #</string>
     <string name="map_type">--Map Type--</string>
     <string name="no_legal">No legal available for this location</string>
+    <string name="clicked_location">Clicked Location</string>
+    <string name="fire_location">Fire Location</string>
 
 
     <string-array name="spinner_north_south">
