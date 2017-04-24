@@ -24,6 +24,7 @@
     <string name="no_legal">No legal available for this location</string>
     <string name="clicked_location">Clicked Location</string>
     <string name="fire_location">Fire Location</string>
+    <string name="fields_empty">Please fill out all fields to add lookout</string>
 
 
     <string-array name="spinner_north_south">

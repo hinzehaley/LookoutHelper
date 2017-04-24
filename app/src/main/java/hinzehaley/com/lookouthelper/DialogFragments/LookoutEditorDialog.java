@@ -12,6 +12,8 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
+import hinzehaley.com.lookouthelper.Constants;
+import hinzehaley.com.lookouthelper.HomeScreen;
 import hinzehaley.com.lookouthelper.Interfaces.OnAddCrossListener;
 import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
@@ -95,13 +97,34 @@ public class LookoutEditorDialog extends DialogFragment {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveLookout();
-                onAddCrossListener.crossAdded();
-                dismiss();
+                if(fieldsFilledOut()) {
+                    saveLookout();
+                    onAddCrossListener.crossAdded();
+                    dismiss();
+                }else{
+                    showErrorMessage();
+                }
             }
         });
 
         return v;
+    }
+
+    private boolean fieldsFilledOut(){
+        if(etLat.getText().toString().matches(Constants.DECIMAL_REGEX)
+                && etLat.getText().toString().matches(Constants.DECIMAL_REGEX)
+                && !etName.getText().toString().equals("")
+                && !etLat.getText().toString().equals("")
+                && !etLon.getText().toString().equals("")){
+            return true;
+
+        }
+        return false;
+    }
+
+    private void showErrorMessage(){
+        HomeScreen screen = (HomeScreen) getActivity();
+        screen.showBasicErrorMessage(getString(R.string.fields_empty));
     }
 
     /**

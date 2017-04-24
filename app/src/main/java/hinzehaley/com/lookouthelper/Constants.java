@@ -30,4 +30,6 @@ public class Constants {
 
     public static String CROSS_LOOKOUT_HINT = "--Cross Lookout--";
 
+    public static String DECIMAL_REGEX = "[+-]?([0-9]*[.])?[0-9]+";
+
 }
