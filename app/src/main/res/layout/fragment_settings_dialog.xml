@@ -113,7 +113,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:hint="Latitude"
-                android:inputType="numberDecimal"
+                android:inputType="numberDecimal|numberSigned"
                 android:imeOptions="actionNext"
                 android:layout_height="wrap_content" />
 
@@ -122,7 +122,7 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:imeOptions="actionNext"
-                    android:inputType="numberDecimal"
+                    android:inputType="numberDecimal|numberSigned"
                     android:hint="Longitude"
                     android:layout_height="wrap_content" />
 

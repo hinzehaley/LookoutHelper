@@ -25,9 +25,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /*
 TODO:
-If user doesn't enter lat and long for a lookout, show error. Right now it crashes.
 Test cross feature
-See if I can make soft keyboard data entry better... Digits only for lat lng, but some way of separating h m s?
 Add a good tutorial
 UI improvements
 Test it all

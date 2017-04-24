@@ -226,8 +226,12 @@ public class InfoReportFragment extends Fragment {
         Float verticalAzimuth = convertDegreesMinutesToFloat(getIntFromEt(etVerticalAzimuthDegrees), getIntFromEt(etVerticalAzimuthMinutes));
         Float crossHorizontalAzimuth = convertDegreesMinutesToFloat(getIntFromEt(etCrossHorizontalAzimuthDegrees), getIntFromEt(etCrossHorizontalAzimuthMinutes));
 
+        String spinnerItem = "";
+        if(spinnerCrossLookout.getSelectedItem() != null){
+            spinnerItem = spinnerCrossLookout.getSelectedItem().toString();
+        }
         MapReportFragment mapReportFragment = MapReportFragment.newInstance(checkboxBaseVisible.isChecked(), checkboxHaveCross.isChecked(),
-                horizontalAzimuth, verticalAzimuth, spinnerCrossLookout.getSelectedItem().toString(), crossHorizontalAzimuth,
+                horizontalAzimuth, verticalAzimuth, spinnerItem, crossHorizontalAzimuth,
                 etSmokeColor.getText().toString(), etLandmark.getText().toString(), etAdditionalInfo.getText().toString());
 
         HomeScreen homeScreen = (HomeScreen) getActivity();

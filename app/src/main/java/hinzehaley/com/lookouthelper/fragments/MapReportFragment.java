@@ -176,6 +176,9 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         showConversionsFragment();
         initilizeMap();
 
+        Log.e("CROSS", "weird bug");
+        Log.i("CROSS", "weird bug");
+
 
         mapTypes = new String[4];
         mapTypes[0] = "Satellite Map";
@@ -307,18 +310,24 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+
+
         //listens for map clicks
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                LatLng nearestPointOnLine = findNearestLinePoint(latLng, horizontalAzimuth);
-                if(curClickMarker != null) {
-                    curClickMarker.remove();
-                }
+
+                if (!haveCross) {
+
+                    LatLng nearestPointOnLine = findNearestLinePoint(latLng, horizontalAzimuth);
+                    if (curClickMarker != null) {
+                        curClickMarker.remove();
+                    }
 
                     curClickMarker = createMarker(getString(R.string.clicked_location), "", BitmapDescriptorFactory.HUE_VIOLET, nearestPointOnLine);
                     showConversionsFragment(nearestPointOnLine);
                     getElevationOfPoint(nearestPointOnLine);
+                }
             }
         });
 
@@ -370,8 +379,10 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
      * own lookout intersect
      */
     private void haveCross(){
-        LatLng yourLocation = new LatLng(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0), prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0));
+
         LatLng fireLocation = null;
+        LatLng yourLocation = new LatLng(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0),
+                prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0));
         float crossLat = prefs.getFloat(crossLookout + "lat", 0);
         float crossLon = prefs.getFloat(crossLookout + "lon", 0);
         LatLng crossLocation = new LatLng(crossLat, crossLon);

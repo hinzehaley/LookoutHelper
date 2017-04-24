@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
+import hinzehaley.com.lookouthelper.Constants;
 import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
 
@@ -142,11 +143,11 @@ public class SettingsDialog extends DialogFragment {
                 prefsEditor.putString(PreferencesKeys.STATE_PREFERENCES_KEY, state);
             }
         }
-        if(containsLatLng(etLat)) {
+        if(containsDecimal(etLat)) {
             Float latitude = Float.parseFloat(etLat.getText().toString());
             prefsEditor.putFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, latitude);
         }
-        if(containsLatLng(etLon)) {
+        if(containsDecimal(etLon)) {
             Float longitude = Float.parseFloat(etLon.getText().toString());
             prefsEditor.putFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, longitude);
         }
@@ -162,24 +163,6 @@ public class SettingsDialog extends DialogFragment {
     }
 
     /**
-     * Does regex matching to see if the et contains a valid lat lng.
-     * Currently this only checks whether the et contains only decimals, colons, and numbers
-     * does not verify that the decimal is within an acceptable range
-     * for lat lng
-     * @param et
-     * @return
-     */
-    private boolean containsLatLng(EditText et){
-        if(containsText(et)){
-            String text = et.getText().toString();
-            if(text.matches("[0-9.:-]*")){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Ensures that et contains only numbers and a decimal
      * @param et
      * @return
@@ -187,7 +170,7 @@ public class SettingsDialog extends DialogFragment {
     private boolean containsDecimal(EditText et){
         if(containsText(et)){
             String text = et.getText().toString();
-            if(text.matches("[0-9.]*")){
+            if(text.matches(Constants.DECIMAL_REGEX)){
                 return true;
             }
         }
