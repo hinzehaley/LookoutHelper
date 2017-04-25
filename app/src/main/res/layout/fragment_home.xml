@@ -6,36 +6,45 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_gravity="bottom"
+
+        android:layout_gravity="top"
         android:layout_marginBottom="20dp"
         android:layout_height="wrap_content">
 
         <Button
             android:id="@+id/btn_report"
             android:text="Report Fire"
-            android:background="@color/transparent_gray"
+            android:drawableTop="@drawable/ic_fire"
+            android:background="@drawable/circle"
             android:textColor="@color/white"
-            android:textSize="30dp"
-            android:padding="10dp"
+            android:textSize="15sp"
+            android:paddingTop="15dp"
+            android:paddingBottom="25dp"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:elevation="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
        <Button
            android:layout_below="@+id/btn_report"
            android:id="@+id/btn_converter"
            android:text="@string/converter"
-           android:background="@color/transparent_gray"
+           android:drawableTop="@drawable/ic_converter"
+           android:background="@drawable/circle"
            android:textColor="@color/white"
-           android:textSize="30dp"
-           android:padding="10dp"
-           android:layout_marginBottom="10dp"
-           android:layout_marginTop="10dp"
+           android:layout_alignParentRight="true"
+           android:textSize="15sp"
+           android:paddingTop="15dp"
+           android:paddingBottom="25dp"
+           android:paddingLeft="25dp"
+           android:paddingRight="25dp"
+           android:layout_margin="10dp"
            android:gravity="center"
-           android:elevation="10dp"
-           android:layout_width="match_parent"
+           android:layout_width="wrap_content"
            android:layout_height="wrap_content" />
 
     </RelativeLayout>
