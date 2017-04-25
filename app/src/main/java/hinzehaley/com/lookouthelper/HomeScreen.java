@@ -25,11 +25,10 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /*
 TODO:
-Test cross feature
 Add a good tutorial
 UI improvements
 Test it all
-Store reported fires -- make it possible to update them?
+Store reported fires -- make it possible to update them? Use SQL
 
  */
 
