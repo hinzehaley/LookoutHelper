@@ -25,12 +25,9 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /*
 TODO:
-Save entries using SQL
-Create view to view entries and edit them
 In Converter, check for valid lat lng input
 UI improvements
 Test it all
-Store reported fires -- make it possible to update them? Use SQL
 
  */
 

@@ -63,9 +63,10 @@ public class ShowConversionsFragment extends Fragment {
      * @param legal
      */
     public void passInNewLocation(Location location, String legal){
-        if(location == null && !this.isDetached()){
+        if(location == null && this.isAdded()){
             HomeScreen activity = (HomeScreen) getActivity();
             activity.showBasicErrorMessage(getString(R.string.could_not_parse_location));
+            activity.onBackPressed();
             return;
         }
 
@@ -90,6 +91,7 @@ public class ShowConversionsFragment extends Fragment {
         if(legal == null && !this.isDetached()){
             HomeScreen activity = (HomeScreen) getActivity();
             activity.showBasicErrorMessage(getString(R.string.could_not_parse_coordinates));
+            activity.onBackPressed();
             return;
         }
 

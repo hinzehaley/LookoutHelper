@@ -3,6 +3,13 @@
     android:layout_height="match_parent"
     tools:context="hinzehaley.com.lookouthelper.fragments.ConverterFragment">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
     <TextView
         android:id="@+id/txt_state"
         android:layout_width="wrap_content"
@@ -41,7 +48,7 @@
 
             <EditText
                 android:id="@+id/et_township"
-                android:inputType="numberDecimal"
+                android:inputType="number"
                 android:layout_width="50dp"
                 android:layout_height="wrap_content" />
 
@@ -58,7 +65,7 @@
             <EditText
                 android:id="@+id/et_range"
                 android:layout_width="50dp"
-                android:inputType="numberDecimal"
+                android:inputType="number"
                 android:layout_height="wrap_content" />
 
             <Spinner
@@ -82,7 +89,7 @@
             <EditText
                 android:id="@+id/et_section"
                 android:layout_width="50dp"
-                android:inputType="numberDecimal"
+                android:inputType="number"
                 android:layout_height="wrap_content" />
 
             <TextView
@@ -160,10 +167,17 @@
             android:text="Submit"
             android:clickable="false"
             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="400dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+        
+
 
     </LinearLayout>
+
+        </FrameLayout>
+
+    </ScrollView>
 
 
 

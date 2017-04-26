@@ -70,7 +70,9 @@ public class GeoConverter {
      * @param locationString
      */
     public void retrievedLocationString(String locationString){
+
         location = getLocationFromJson(locationString);
+
         showConversionsFragment.passInNewLocation(location, legal);
     }
 
@@ -80,7 +82,11 @@ public class GeoConverter {
      * @param legalString
      */
     public void retrievedLegalString(String legalString){
+        Log.i("URL", "got legal successfully");
+
         legal = getLegalFromJson(legalString);
+        Log.i("URL", "got legal successfully. It is: " + legal);
+
         showConversionsFragment.passInNewLegal(location, legal);
     }
 

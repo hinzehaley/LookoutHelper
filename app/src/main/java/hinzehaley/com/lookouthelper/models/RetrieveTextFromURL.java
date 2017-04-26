@@ -1,6 +1,8 @@
 package hinzehaley.com.lookouthelper.models;
 
 import android.os.AsyncTask;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -37,6 +39,7 @@ public class RetrieveTextFromURL extends AsyncTask<String, String, String> {
     protected String doInBackground(String... strings) {
 
         try{
+            Log.i("URL", "retrieving text");
             URL url = new URL(strings[0]);
             this.url = strings[0];
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -61,10 +64,16 @@ public class RetrieveTextFromURL extends AsyncTask<String, String, String> {
      */
     @Override
     protected void onPostExecute(String s) {
+        Log.i("URL", "onPostExecute");
+
         super.onPostExecute(s);
         if(isLegal) {
+            Log.i("URL", "is legal");
+
             geoConverter.retrievedLocationString(fullText);
         }else{
+            Log.i("URL", "not legal");
+
             geoConverter.retrievedLegalString(fullText);
         }
     }

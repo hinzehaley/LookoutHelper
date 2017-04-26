@@ -106,6 +106,7 @@
     <string name="tutorial_map_tap_line">Tap any point along the line to create a new marker if you are not happy with the locations generated.</string>
     <string name="tutorial_map_tap_marker">Tap map markers for more information.</string>
     <string name="tutorial_map_location_info_for_marker">The location information at the bottom of the screen is the location of the currently tapped marker.</string>
-    <string name="save">Save</string>
+    <string name="coordinates_wrong_format">The coordinates entered are the incorrect format</string>
+    <string name="legal_wrong_format">The legal entered is the incorrect format</string>
 
 </resources>

@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -130,12 +132,23 @@ public class ConverterFragment extends Fragment {
      * @param et
      */
     private void setListenerEditText(EditText et){
-        et.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        et.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onFocusChange(View view, boolean b) {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 makeSubmitButtonClickableIfNecessary();
             }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
         });
+
     }
 
     /**
@@ -182,11 +195,14 @@ public class ConverterFragment extends Fragment {
      * @return
      */
     private boolean latLonEntered(){
+
         if(editTextContainsText(etLat) && editTextContainsText(etLon)){
             return true;
         }
         return false;
     }
+
+
 
     /**
      * Makes submit button clickable if necessary fields are filled in.
@@ -208,26 +224,40 @@ public class ConverterFragment extends Fragment {
                         SharedPreferences prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
                         String state = prefs.getString(PreferencesKeys.STATE_PREFERENCES_KEY, null);
                         int principalMeridian = prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1);
-                        if((state == null) || principalMeridian == -1){
-                            //TODO: SHOW ERROR ASKING TO EDIT SETTINGS
-                            return;
+                        try {
+                            geoConverter.requestLocationFromLegal(showConversionsFragment, state, principalMeridian, Integer.parseInt(etTownship.getText().toString()),
+                                    Integer.parseInt(etRange.getText().toString()),
+                                    Integer.parseInt(etSection.getText().toString()),
+                                    etQuarterSection.getText().toString(), spinnerTownship.getSelectedItem().toString(), spinnerRange.getSelectedItem().toString());
+                            //hide soft keyboard
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+                            HomeScreen homeScreen = (HomeScreen) getActivity();
+                            homeScreen.goToConversionsFragment(showConversionsFragment);
+                        }catch (IllegalArgumentException e){
+                            HomeScreen homeScreen = (HomeScreen) getActivity();
+                            homeScreen.showBasicErrorMessage(getString(R.string.legal_wrong_format));
                         }
-
-                        geoConverter.requestLocationFromLegal(showConversionsFragment, state, principalMeridian, Integer.parseInt(etTownship.getText().toString()),
-                                Integer.parseInt(etRange.getText().toString()),
-                                Integer.parseInt(etSection.getText().toString()),
-                                etQuarterSection.getText().toString(), spinnerTownship.getSelectedItem().toString(), spinnerRange.getSelectedItem().toString());
                     }else if(latLonEntered()){
-                        geoConverter.requestLegalFromLocation(showConversionsFragment,
-                                Location.convert(etLat.getText().toString()),
-                                Location.convert(etLon.getText().toString()));
-                    }
-                    //hide soft keyboard
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        try {
+                            geoConverter.requestLegalFromLocation(showConversionsFragment,
+                                    Location.convert(etLat.getText().toString()),
+                                    Location.convert(etLon.getText().toString()));
+                            //hide soft keyboard
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-                    HomeScreen homeScreen = (HomeScreen) getActivity();
-                    homeScreen.goToConversionsFragment(showConversionsFragment);
+                            HomeScreen homeScreen = (HomeScreen) getActivity();
+                            homeScreen.goToConversionsFragment(showConversionsFragment);
+
+                        }catch (IllegalArgumentException e){
+                            HomeScreen homeScreen = (HomeScreen) getActivity();
+                            homeScreen.showBasicErrorMessage(getString(R.string.coordinates_wrong_format));
+
+                        }
+                    }
+
                 }
             });
         }
