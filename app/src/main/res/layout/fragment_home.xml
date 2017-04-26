@@ -11,6 +11,17 @@
         android:layout_marginBottom="20dp"
         android:layout_height="wrap_content">
 
+        <ImageButton
+            android:id="@+id/btn_question"
+            android:src="@drawable/ic_help"
+            android:padding="10dp"
+            android:background="@color/transparent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
         <Button
             android:id="@+id/btn_report"
             android:text="Report Fire"
@@ -48,5 +59,59 @@
            android:layout_height="wrap_content" />
 
     </RelativeLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/tutorial_home"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:background="@color/transparent_gray_dark"
+        android:layout_gravity="top"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/btn_exit_tutorial"
+            android:text="x"
+            android:padding="10dp"
+            android:textSize="40sp"
+            android:layout_gravity="right"
+            android:gravity="right"
+            android:textColor="@color/white"
+            android:background="@color/transparent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:textSize="25sp"
+            android:layout_alignParentTop="true"
+            android:gravity="center_horizontal"
+            android:textColor="@color/white"
+            android:text="@string/tutorial_menu_home"
+            android:padding="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:textSize="25sp"
+            android:gravity="center_horizontal"
+            android:textColor="@color/white"
+            android:padding="30dp"
+            android:text="@string/tutorial_home_report"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+        <TextView
+            android:textSize="25sp"
+            android:gravity="center_horizontal"
+            android:textColor="@color/white"
+            android:padding="30dp"
+            android:text="@string/tutorial_converter_home"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
 </FrameLayout>

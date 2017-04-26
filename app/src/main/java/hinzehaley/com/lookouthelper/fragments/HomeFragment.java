@@ -7,6 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import hinzehaley.com.lookouthelper.HomeScreen;
 import hinzehaley.com.lookouthelper.R;
@@ -75,8 +78,28 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        final LinearLayout tutorial = (LinearLayout) v.findViewById(R.id.tutorial_home);
+
+        ImageButton btnHelp = (ImageButton) v.findViewById(R.id.btn_question);
+        btnHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tutorial.setVisibility(View.VISIBLE);
+            }
+        });
+
+        Button btnExitTutorial = (Button) v.findViewById(R.id.btn_exit_tutorial);
+        btnExitTutorial.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tutorial.setVisibility(View.GONE);
+            }
+        });
+
         return v;
     }
+
+
 
     /**
      * Shows an error dialog with a given message and an ok button that dismisses

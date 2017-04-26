@@ -92,5 +92,8 @@
         <item>WY</item>
     </string-array>
     <string name="title_activity_maps">Map</string>
+    <string name="tutorial_menu_home">Visit the menu in the top right to edit lookout information or add cross lookouts</string>
+    <string name="tutorial_home_report">Tap \"Report Fire\" to create a report</string>
+    <string name="tutorial_converter_home">Tap \"Converter\" to convert from lat lng to legal or vice versa</string>
 
 </resources>

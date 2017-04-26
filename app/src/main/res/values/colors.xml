@@ -8,7 +8,7 @@
     <color name="ruby">#A2341C</color>
     <color name="gray">#786A64</color>
     <color name="transparent_gray">#AA786A64</color>
-    <color name="transparent_gray_dark">#AA302929</color>
+    <color name="transparent_gray_dark">#CC302929</color>
     <color name="transparent_colorPrimaryDark">#99293223</color>
     <color name="transparent">#00000000</color>
 </resources>
