@@ -43,9 +43,6 @@ public class InfoReportFragment extends Fragment {
     private EditText etHorizontalAzimuthMintues;
     private EditText etVerticalAzimuthDegrees;
     private EditText etVerticalAzimuthMinutes;
-    private EditText etSmokeColor;
-    private EditText etLandmark;
-    private EditText etAdditionalInfo;
     private Spinner spinnerCrossLookout;
     private EditText etCrossHorizontalAzimuthDegrees;
     private EditText etCrossHorizontalAzimuthMinutes;
@@ -148,9 +145,6 @@ public class InfoReportFragment extends Fragment {
         etHorizontalAzimuthMintues = (EditText) v.findViewById(R.id.et_horizontal_azimuth_minutes);
         etVerticalAzimuthDegrees = (EditText) v.findViewById(R.id.et_vertical_azimuth_degrees);
         etVerticalAzimuthMinutes = (EditText) v.findViewById(R.id.et_vertical_azimuth_minutes);
-        etSmokeColor = (EditText) v.findViewById(R.id.et_smoke_color);
-        etLandmark = (EditText) v.findViewById(R.id.et_landmark);
-        etAdditionalInfo = (EditText) v.findViewById(R.id.et_additional_info);
         spinnerCrossLookout = (Spinner) v.findViewById(R.id.spinner_cross_lookout);
         etCrossHorizontalAzimuthDegrees = (EditText) v.findViewById(R.id.et_horizontal_azimuth_cross_degrees);
         etCrossHorizontalAzimuthMinutes = (EditText) v.findViewById(R.id.et_horizontal_azimuth_cross_minutes);
@@ -253,8 +247,7 @@ public class InfoReportFragment extends Fragment {
             spinnerItem = spinnerCrossLookout.getSelectedItem().toString();
         }
         MapReportFragment mapReportFragment = MapReportFragment.newInstance(checkboxBaseVisible.isChecked(), checkboxHaveCross.isChecked(),
-                horizontalAzimuth, verticalAzimuth, spinnerItem, crossHorizontalAzimuth,
-                etSmokeColor.getText().toString(), etLandmark.getText().toString(), etAdditionalInfo.getText().toString());
+                horizontalAzimuth, verticalAzimuth, spinnerItem, crossHorizontalAzimuth);
 
         HomeScreen homeScreen = (HomeScreen) getActivity();
         homeScreen.goToMapFragment(mapReportFragment);

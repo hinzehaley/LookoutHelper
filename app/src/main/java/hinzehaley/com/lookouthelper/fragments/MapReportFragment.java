@@ -62,10 +62,8 @@ import hinzehaley.com.lookouthelper.models.VolleyRequester;
 public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
     //args keys
-    private static final String SMOKE_COLOR = "smokeColor";
+
     private static final String CROSS_LOOKOUT = "crossLookout";
-    private static final String LANDMARK = "landmark";
-    private static final String ADDITIONAL_INFO = "additionalInfo";
     private static final String BASE_VISIBLE = "baseVisible";
     private static final String HAVE_CROSS = "haveCross";
     private static final String HORIZONTAL_AZIMUTH = "horizontalAzimuth";
@@ -83,10 +81,8 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
     private ArrayList<LocationElevation> elevationArr;
 
-    private String smokeColor;
     private String crossLookout;
-    private String landmark;
-    private String additionalInfo;
+
     private boolean baseVisible;
     private boolean haveCross;
     private float horizontalAzimuth;
@@ -114,8 +110,7 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
      * @return A new instance of fragment MapReportFragment.
      */
     public static MapReportFragment newInstance(boolean baseVisible, boolean haveCross, float horizontalAzimuth,
-                                                float verticalAzimuth, String crossLookout, float crossAzimuth,
-                                                String smokeColor, String landmark, String additionalInfo) {
+                                                float verticalAzimuth, String crossLookout, float crossAzimuth) {
         MapReportFragment fragment = new MapReportFragment();
         Bundle args = new Bundle();
         args.putBoolean(BASE_VISIBLE, baseVisible);
@@ -124,9 +119,7 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         args.putFloat(VERTICAL_AZIMUTH, verticalAzimuth);
         args.putString(CROSS_LOOKOUT, crossLookout);
         args.putFloat(CROSS_AZIMUTH, crossAzimuth);
-        args.putString(SMOKE_COLOR, smokeColor);
-        args.putString(LANDMARK, landmark);
-        args.putString(ADDITIONAL_INFO, additionalInfo);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -150,9 +143,6 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             crossLookout = getArguments().getString(CROSS_LOOKOUT);
             crossAzimuth = getArguments().getFloat(CROSS_AZIMUTH);
             verticalAzimuth = getArguments().getFloat(VERTICAL_AZIMUTH);
-            smokeColor = getArguments().getString(SMOKE_COLOR);
-            landmark = getArguments().getString(LANDMARK);
-            additionalInfo = getArguments().getString(ADDITIONAL_INFO);
         }
     }
 
@@ -205,30 +195,7 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-        Button btnSave = (Button) v.findViewById(R.id.btn_save);
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveEntryIfPossible();
-            }
-        });
-
         return v;
-    }
-
-
-    private void saveEntryIfPossible(){
-        if(showConversionsFragment != null &&
-                showConversionsFragment.getLegal() != null &&
-                showConversionsFragment.getLocation() != null){
-            String legal = showConversionsFragment.getLegal();
-            Location location = showConversionsFragment.getLocation();
-            //TODO:save entry to SQL
-
-            HomeScreen mainActivity = (HomeScreen) getActivity();
-            mainActivity.goToHomeFragment();
-            mainActivity.showBasicErrorMessage(getString(R.string.entry_saved));
-        }
     }
 
     @Override

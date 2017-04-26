@@ -56,13 +56,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <TextView
-        android:text="@string/tutorial_map_save_report"
-        android:textColor="@color/white"
-        android:padding="10dp"
-        android:textSize="20sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
         </LinearLayout>
 

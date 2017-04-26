@@ -172,37 +172,15 @@
         </LinearLayout>
 
 
-                <TextView
-                    android:text="Additional Info"
-                    android:textSize="25dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
 
-                <EditText
-                    android:id="@+id/et_smoke_color"
-                    android:layout_width="match_parent"
-                    android:hint="Smoke Color"
-                    android:imeOptions="actionNext"
-                    android:layout_height="wrap_content" />
 
-                <EditText
-                    android:id="@+id/et_landmark"
-                    android:layout_width="match_parent"
-                    android:hint="Landmark"
-                    android:imeOptions="actionNext"
-                    android:layout_height="wrap_content" />
 
-                <EditText
-                    android:id="@+id/et_additional_info"
-                    android:layout_width="match_parent"
-                    android:hint="Additional Info"
-                    android:imeOptions="actionNext"
-                    android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btn_next"
             android:background="@color/transparent_colorPrimaryDark"
             android:text="Next"
+            android:layout_marginTop="30dp"
             android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
