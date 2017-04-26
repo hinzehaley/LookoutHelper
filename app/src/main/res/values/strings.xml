@@ -95,5 +95,8 @@
     <string name="tutorial_menu_home">Visit the menu in the top right to edit lookout information or add cross lookouts</string>
     <string name="tutorial_home_report">Tap \"Report Fire\" to create a report</string>
     <string name="tutorial_converter_home">Tap \"Converter\" to convert from lat lng to legal or vice versa</string>
+    <string name="no_cross_lookouts">You currently do not have any cross lookouts added. To add a cross lookout, tap on the menu button on the top right.</string>
+    <string name="no_cross_selected">Please select a cross lookout.</string>
+    <string name="cross_lookout_prompt">--Cross Lookout--</string>
 
 </resources>

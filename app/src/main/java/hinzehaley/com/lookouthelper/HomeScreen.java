@@ -27,8 +27,6 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 TODO:
 Add a good tutorial
 In Converter, check for valid lat lng input
-If no cross lookouts available, make spinner show error.
-If no cross lookout selected, show error.
 UI improvements
 Test it all
 Store reported fires -- make it possible to update them? Use SQL

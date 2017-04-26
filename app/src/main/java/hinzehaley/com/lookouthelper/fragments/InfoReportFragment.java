@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -96,7 +97,9 @@ public class InfoReportFragment extends Fragment {
 
                 HomeScreen screen = (HomeScreen)getActivity();
                 if(screen.isConnectedToNetwork()) {
-                    goToMapFragment();
+                    if(haveNecessaryItems()) {
+                        goToMapFragment();
+                    }
                 }else{
                     screen.showBasicErrorMessage(getString(R.string.no_internet));
                 }
@@ -120,6 +123,17 @@ public class InfoReportFragment extends Fragment {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         return v;
+    }
+
+    private boolean haveNecessaryItems(){
+        if (checkboxHaveCross.isChecked()){
+            if(spinnerCrossLookout.getSelectedItem() == null || spinnerCrossLookout.getSelectedItem().toString().equals(getString(R.string.cross_lookout_prompt))){
+                HomeScreen mainActivity = (HomeScreen) getActivity();
+                mainActivity.showBasicErrorMessage(getString(R.string.no_cross_selected));
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -152,14 +166,22 @@ public class InfoReportFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if(checkboxHaveCross.isChecked()){
-                    layoutCross.setVisibility(View.VISIBLE);
-                    layoutVerticalAzimuth.setVisibility(View.GONE);
+                    showCrossClicked();
                 }else{
                     layoutCross.setVisibility(View.GONE);
                     layoutVerticalAzimuth.setVisibility(View.VISIBLE);
                 }
             }
         });
+    }
+
+    private void showCrossClicked(){
+        layoutCross.setVisibility(View.VISIBLE);
+        layoutVerticalAzimuth.setVisibility(View.GONE);
+        if(spinnerCrossLookout.getAdapter().getCount() == 0) {
+            HomeScreen mainActivity = (HomeScreen) getActivity();
+            mainActivity.showBasicErrorMessage(getString(R.string.no_cross_lookouts));
+        }
     }
 
     /**
@@ -207,7 +229,7 @@ public class InfoReportFragment extends Fragment {
             lookoutNumber += 1;
         }
 
-        adapter.add(Constants.CROSS_LOOKOUT_HINT);
+        adapter.add(getString(R.string.cross_lookout_prompt));
 
         spinnerCrossLookout.setAdapter(adapter);
         spinnerCrossLookout.setSelection(adapter.getCount()); //display hint
@@ -302,7 +324,12 @@ public class InfoReportFragment extends Fragment {
         return false;
     }
 
-
-
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(checkboxHaveCross.isChecked()){
+            showCrossClicked();
+        }
+        populateSpinner();
+    }
 }

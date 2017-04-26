@@ -176,8 +176,6 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
         showConversionsFragment();
         initilizeMap();
 
-        Log.e("CROSS", "weird bug");
-        Log.i("CROSS", "weird bug");
 
 
         mapTypes = new String[4];
