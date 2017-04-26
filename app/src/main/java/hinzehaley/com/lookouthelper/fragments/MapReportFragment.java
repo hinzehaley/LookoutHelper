@@ -18,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -179,12 +181,33 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
 
 
         mapTypes = new String[4];
-        mapTypes[0] = "Satellite Map";
-        mapTypes[1] = "Road Map";
-        mapTypes[2] = "Terrain Map";
-        mapTypes[3] = "Hybrid Map";
+        mapTypes[0] = getString(R.string.satellite_map);
+        mapTypes[1] = getString(R.string.road_map);
+        mapTypes[2] = getString(R.string.terrain_map);
+        mapTypes[3] = getString(R.string.hybrid_map);
+
+        final LinearLayout mapTutorial = (LinearLayout) v.findViewById(R.id.map_tutorial);
+
+        ImageButton btnHelp = (ImageButton) v.findViewById(R.id.btn_help);
+        btnHelp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mapTutorial.setVisibility(View.VISIBLE);
+            }
+        });
+
+        Button btnExitTutorial = (Button) v.findViewById(R.id.btn_exit_tutorial);
+        btnExitTutorial.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mapTutorial.setVisibility(View.GONE);
+            }
+        });
+
         return v;
     }
+
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
