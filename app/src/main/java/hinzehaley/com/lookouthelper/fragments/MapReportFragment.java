@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import hinzehaley.com.lookouthelper.Constants;
+import hinzehaley.com.lookouthelper.HomeScreen;
 import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
 import hinzehaley.com.lookouthelper.models.GeoConverter;
@@ -204,10 +205,31 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+        Button btnSave = (Button) v.findViewById(R.id.btn_save);
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveEntryIfPossible();
+            }
+        });
+
         return v;
     }
 
 
+    private void saveEntryIfPossible(){
+        if(showConversionsFragment != null &&
+                showConversionsFragment.getLegal() != null &&
+                showConversionsFragment.getLocation() != null){
+            String legal = showConversionsFragment.getLegal();
+            Location location = showConversionsFragment.getLocation();
+            //TODO:save entry to SQL
+
+            HomeScreen mainActivity = (HomeScreen) getActivity();
+            mainActivity.goToHomeFragment();
+            mainActivity.showBasicErrorMessage(getString(R.string.entry_saved));
+        }
+    }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {

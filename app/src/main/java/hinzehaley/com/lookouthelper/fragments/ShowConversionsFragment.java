@@ -152,4 +152,12 @@ public class ShowConversionsFragment extends Fragment {
             displayLocation();
         }
     }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public String getLegal() {
+        return legal;
+    }
 }

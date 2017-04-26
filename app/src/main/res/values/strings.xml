@@ -107,5 +107,7 @@
     <string name="tutorial_map_tap_marker">Tap map markers for more information.</string>
     <string name="tutorial_map_location_info_for_marker">The location information at the bottom of the screen is the location of the currently tapped marker.</string>
     <string name="tutorial_map_save_report">When you have selected the marker at the correct location, tap \"Save\" in the bottom right to save your report.</string>
+    <string name="save">Save</string>
+    <string name="entry_saved">Entry saved successfully!</string>
 
 </resources>
