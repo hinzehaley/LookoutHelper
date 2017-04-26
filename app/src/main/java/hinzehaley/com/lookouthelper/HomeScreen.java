@@ -25,8 +25,6 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 /*
 TODO:
-In Converter, check for valid lat lng input
-UI improvements
 Test it all
 
  */
