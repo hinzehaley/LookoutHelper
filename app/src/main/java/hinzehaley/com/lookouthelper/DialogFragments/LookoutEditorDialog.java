@@ -1,14 +1,17 @@
 package hinzehaley.com.lookouthelper.DialogFragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -71,6 +74,9 @@ public class LookoutEditorDialog extends DialogFragment {
         etName = (EditText) v.findViewById(R.id.et_lookout_name);
         etLat = (EditText) v.findViewById(R.id.et_lookout_lat);
         etLon = (EditText) v.findViewById(R.id.et_lookout_lon);
+        setOnFocusChangeListener(etName);
+        setOnFocusChangeListener(etLat);
+        setOnFocusChangeListener(etLon);
         btnSave = (Button) v.findViewById(R.id.btn_save);
         btnCancel = (Button) v.findViewById(R.id.btn_cancel);
         btnDelete = (Button) v.findViewById(R.id.btn_delete);
@@ -90,6 +96,7 @@ public class LookoutEditorDialog extends DialogFragment {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                hideSoftKeyboard(view);
                 dismiss();
             }
         });
@@ -100,6 +107,7 @@ public class LookoutEditorDialog extends DialogFragment {
                 if(fieldsFilledOut()) {
                     saveLookout();
                     onAddCrossListener.crossAdded();
+                    hideSoftKeyboard(view);
                     dismiss();
                 }else{
                     showErrorMessage();
@@ -108,6 +116,23 @@ public class LookoutEditorDialog extends DialogFragment {
         });
 
         return v;
+    }
+
+    private void setOnFocusChangeListener(EditText et){
+        et.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    hideSoftKeyboard(v);
+                }
+            }
+        });
+    }
+
+    private void hideSoftKeyboard(View view){
+        InputMethodManager inputMethodManager = (InputMethodManager)  getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
     }
 
     private boolean fieldsFilledOut(){
@@ -175,6 +200,7 @@ public class LookoutEditorDialog extends DialogFragment {
      */
     private void deleteEntry(){
         onAddCrossListener.crossDeleted(position);
+        hideSoftKeyboard(v);
         dismiss();
     }
 

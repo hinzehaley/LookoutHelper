@@ -4,6 +4,8 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="10dp"
+    android:clickable="true"
+    android:focusableInTouchMode="true"
     android:background="@color/white"
     android:elevation="10dp"
     tools:context="hinzehaley.com.lookouthelper.DialogFragments.LookoutEditorDialog">
