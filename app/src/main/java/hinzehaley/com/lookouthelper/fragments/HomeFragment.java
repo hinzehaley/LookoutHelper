@@ -71,7 +71,11 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if(homeScreen.lookoutInfoSet()) {
-                    addInfoReportFragment();
+                    if(homeScreen.isUsingLocation && homeScreen.mLastLocation == null){
+                        showErrorDialog(getString(R.string.unable_to_get_location));
+                    }else {
+                        addInfoReportFragment();
+                    }
                 }else{
                     showErrorDialog(getString(R.string.no_lookout_set));
                 }

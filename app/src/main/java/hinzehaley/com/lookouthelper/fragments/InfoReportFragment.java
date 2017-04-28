@@ -4,6 +4,7 @@ package hinzehaley.com.lookouthelper.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -21,19 +22,28 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 
 import hinzehaley.com.lookouthelper.Constants;
 import hinzehaley.com.lookouthelper.HomeScreen;
+import hinzehaley.com.lookouthelper.Interfaces.SingleElevationListener;
 import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
+import hinzehaley.com.lookouthelper.models.JSONParser;
+import hinzehaley.com.lookouthelper.models.LocationElevation;
+import hinzehaley.com.lookouthelper.models.VolleyRequester;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * Fragment for inputting information about a smoke
  */
-public class InfoReportFragment extends Fragment {
+public class InfoReportFragment extends Fragment implements SingleElevationListener{
 
     private CheckBox checkboxBaseVisible;
     private CheckBox checkboxHaveCross;
@@ -48,6 +58,8 @@ public class InfoReportFragment extends Fragment {
     private EditText etCrossHorizontalAzimuthMinutes;
     private Button btnNext;
     private View v;
+    private LocationElevation yourLocationElevation;
+    private SharedPreferences prefs;
 
     private LinearLayout mainLayout;
 
@@ -82,6 +94,11 @@ public class InfoReportFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_azimuth, container, false);
+        // gets lookout names from SharedPreferences and adds them to adapter
+        prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
+
+        HomeScreen homeScreen = (HomeScreen) getActivity();
+        requestSingleLocationElevation();
         getViewReferences();
         setCheckboxListeners();
         populateSpinner();
@@ -100,6 +117,7 @@ public class InfoReportFragment extends Fragment {
                 }else{
                     screen.showBasicErrorMessage(getString(R.string.no_internet));
                 }
+
             }
         });
 
@@ -122,15 +140,47 @@ public class InfoReportFragment extends Fragment {
         return v;
     }
 
+    private void requestSingleLocationElevation(){
+        HomeScreen homeScreen = (HomeScreen) getActivity();
+        if(homeScreen.isUsingLocation) {
+            if(homeScreen.isConnectedToNetwork()) {
+                VolleyRequester requester = VolleyRequester.getInstance();
+                requester.requestSingleElevation(homeScreen.mLastLocation.getLatitude(), homeScreen.mLastLocation.getLongitude(), this, getContext());
+            }else{
+                homeScreen.showErrorDialog(getString(R.string.no_internet));
+            }
+        }
+    }
+
     private boolean haveNecessaryItems(){
+        HomeScreen mainActivity = (HomeScreen) getActivity();
+
         if (checkboxHaveCross.isChecked()){
             if(spinnerCrossLookout.getSelectedItem() == null || spinnerCrossLookout.getSelectedItem().toString().equals(getString(R.string.cross_lookout_prompt))){
-                HomeScreen mainActivity = (HomeScreen) getActivity();
                 mainActivity.showBasicErrorMessage(getString(R.string.no_cross_selected));
                 return false;
             }
         }
+        if(yourLocationElevation == null && mainActivity.isUsingLocation){
+            mainActivity.showBasicErrorMessage(getString(R.string.unable_to_get_your_elevation));
+            return false;
+        }
         return true;
+    }
+
+    @Override
+    public void singleElevationRetrieved(JSONArray arr){
+        if(arr != null) {
+            try {
+                yourLocationElevation = JSONParser.parseSingleElevation(arr);
+                return;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        HomeScreen homeScreen = (HomeScreen) getActivity();
+        homeScreen.showErrorDialog(getString(R.string.unable_to_get_your_elevation));
+        homeScreen.goToHomeFragment();
     }
 
     /**
@@ -206,8 +256,7 @@ public class InfoReportFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 
-        // gets lookout names from SharedPreferences and adds them to adapter
-        SharedPreferences prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
+
         ArrayList<String> lookoutNames = new ArrayList();
         boolean gettingLookouts = true;
         int lookoutNumber = 0;
@@ -231,6 +280,32 @@ public class InfoReportFragment extends Fragment {
 
     }
 
+    private LatLng getCrossLocation(String name){
+        float lat = prefs.getFloat(name + PreferencesKeys.LAT, 100000);
+        float lng = prefs.getFloat(name + PreferencesKeys.LON, 100000);
+        if(lat != 100000 && lng != 100000) {
+            return new LatLng(lat, lng);
+        }
+        return null;
+    }
+
+    private LocationElevation getLocationElevation(){
+        float lat = prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 100000);
+        float lng = prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 100000);
+        float elevation = prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, -100000);
+        if(lat != 100000 && lng != 100000 && elevation != -100000) {
+            Location location = new Location("");
+            location.setLatitude(lat);
+            location.setLongitude(lng);
+            return new LocationElevation(location, footToMeter(elevation));
+        }
+        return null;
+    }
+
+    public static double footToMeter(double foot){
+        return foot * 0.3048;
+    }
+
     /**
      * Proceeds to map fragment
      */
@@ -243,14 +318,45 @@ public class InfoReportFragment extends Fragment {
         Float crossHorizontalAzimuth = convertDegreesMinutesToFloat(getIntFromEt(etCrossHorizontalAzimuthDegrees), getIntFromEt(etCrossHorizontalAzimuthMinutes));
 
         String spinnerItem = "";
+        double crossLat = 0;
+        double crossLng = 0;
+
         if(spinnerCrossLookout.getSelectedItem() != null){
             spinnerItem = spinnerCrossLookout.getSelectedItem().toString();
+            LatLng crossLocation = getCrossLocation(spinnerItem);
+            crossLat = crossLocation.latitude;
+            crossLng = crossLocation.longitude;
         }
+
+        if(!setCorrectStartLocationElevation()){
+            return;
+        }
+
         MapReportFragment mapReportFragment = MapReportFragment.newInstance(checkboxBaseVisible.isChecked(), checkboxHaveCross.isChecked(),
-                horizontalAzimuth, verticalAzimuth, spinnerItem, crossHorizontalAzimuth);
+                horizontalAzimuth, verticalAzimuth, crossHorizontalAzimuth, yourLocationElevation, crossLat, crossLng);
 
         HomeScreen homeScreen = (HomeScreen) getActivity();
         homeScreen.goToMapFragment(mapReportFragment);
+    }
+
+    private boolean setCorrectStartLocationElevation(){
+        HomeScreen homeScreen = (HomeScreen) getActivity();
+        if(homeScreen.isUsingLocation){
+            if(yourLocationElevation == null){
+                requestSingleLocationElevation();
+                if(homeScreen.mLastLocation == null){
+                    homeScreen.showBasicErrorMessage(getString(R.string.unable_to_get_location));
+                    return false;
+                }else{
+                    requestSingleLocationElevation();
+                    homeScreen.showBasicErrorMessage(getString(R.string.unable_to_get_your_elevation));
+                    return false;
+                }
+            }
+        }else{
+            yourLocationElevation = getLocationElevation();
+        }
+        return true;
     }
 
     public static void hideSoftKeyboard(Activity activity) {
@@ -325,4 +431,6 @@ public class InfoReportFragment extends Fragment {
         }
         populateSpinner();
     }
+
+
 }

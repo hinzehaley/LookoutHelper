@@ -14,4 +14,5 @@ public class PreferencesKeys {
     public static String LOOKOUT_ELEVATION_PREFERENCES_KEY = "lookoutElevation";
     public static String PRINCIPAL_MERIDIAN_PREFERENCES_KEY = "principalMeridian";
     public static String CROSS_LOOKOUT_PREFERENCES_KEY = "crossLookout";
+    public static String USE_LOCATION = "useLocation";
 }

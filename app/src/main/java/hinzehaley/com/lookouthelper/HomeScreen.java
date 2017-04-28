@@ -3,6 +3,7 @@ package hinzehaley.com.lookouthelper;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -15,11 +16,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import hinzehaley.com.lookouthelper.DialogFragments.SettingsDialog;
 import hinzehaley.com.lookouthelper.fragments.InfoReportFragment;
 import hinzehaley.com.lookouthelper.fragments.ConverterFragment;
 import hinzehaley.com.lookouthelper.fragments.CrossLookoutFragment;
 import hinzehaley.com.lookouthelper.fragments.HomeFragment;
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 
@@ -35,6 +41,9 @@ Test it all
 
 public class HomeScreen extends AppCompatActivity {
 
+    public Location mLastLocation;
+    public boolean isUsingLocation = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,50 +51,65 @@ public class HomeScreen extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        isUsingLocation = shouldBeMonitoringLocation();
+
         HomeFragment homeFragment = HomeFragment.newInstance();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.fragment_container, homeFragment);
         transaction.commit();
 
         //detects if user hasn't entered lookout location, shows dialog to get info
-        if(!lookoutInfoSet()){
+        if (!lookoutInfoSet()) {
             showSettingsDialog();
         }
     }
 
     /**
+     *
+     * @return true if we should be monitoring user's location, false otherwise
+     */
+    private boolean shouldBeMonitoringLocation(){
+        SharedPreferences prefs = getSharedPreferences(this.getPackageName(), Context.MODE_PRIVATE);
+        return prefs.getBoolean(PreferencesKeys.USE_LOCATION, false);
+    }
+
+    /**
      * @return false if lookout info not set. True otherwise
      */
-    public boolean lookoutInfoSet(){
+    public boolean lookoutInfoSet() {
         SharedPreferences prefs = getSharedPreferences(this.getPackageName(), Context.MODE_PRIVATE);
-        if(prefs.getString(PreferencesKeys.STATE_PREFERENCES_KEY, null) == null){
+        if (prefs.getString(PreferencesKeys.STATE_PREFERENCES_KEY, null) == null) {
             return false;
         }
-        if(prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0) == 0){
+        if (prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1) == -1) {
             return false;
         }
-        if(prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0) == 0){
-            return false;
+
+        if(!prefs.getBoolean(PreferencesKeys.USE_LOCATION, false)) {
+
+            if (prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0) == 0) {
+                return false;
+            }
+            if (prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0) == 0) {
+                return false;
+            }
+            if (prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, -1) == -1) {
+                return false;
+            }
         }
-        if(prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, -1) == -1){
-            return false;
-        }
-        if(prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1) == -1){
-            return false;
-        }
+
         return true;
     }
 
     /**
      * Shows dialog for user to input lookout info
      */
-    private void showSettingsDialog(){
-        if(getSupportFragmentManager().findFragmentByTag("SettingsDialog")==null) {
+    private void showSettingsDialog() {
+        if (getSupportFragmentManager().findFragmentByTag("SettingsDialog") == null) {
             DialogFragment newFragment = new SettingsDialog();
             newFragment.show(getSupportFragmentManager(), "SettingsDialog");
         }
     }
-
 
 
     @Override
@@ -97,6 +121,7 @@ public class HomeScreen extends AppCompatActivity {
 
     /**
      * Sets up menu items
+     *
      * @param item
      * @return
      */
@@ -111,7 +136,8 @@ public class HomeScreen extends AppCompatActivity {
         if (id == R.id.action_settings) {
             showSettingsDialog();
             return true;
-        }if (id == R.id.action_cross_lookouts) {
+        }
+        if (id == R.id.action_cross_lookouts) {
             showCrossLookoutEditorFragment();
             return true;
         }
@@ -122,53 +148,56 @@ public class HomeScreen extends AppCompatActivity {
     /**
      * Shows fragment to input legal or lat lng and convert
      */
-    public void goToConverterFragment(){
+    public void goToConverterFragment() {
         ConverterFragment converterFragment = ConverterFragment.newInstance();
         replaceMainFragment(converterFragment);
     }
 
     /**
      * Shows fragment that displays conversions from legal to lat lng and vice versa
+     *
      * @param conversionsFragment
      */
-    public void goToConversionsFragment(Fragment conversionsFragment){
+    public void goToConversionsFragment(Fragment conversionsFragment) {
         replaceMainFragment(conversionsFragment);
     }
 
     /**
      * Shows fragment displaying cross lookouts
      */
-    private void showCrossLookoutEditorFragment(){
+    private void showCrossLookoutEditorFragment() {
         CrossLookoutFragment crossLookoutFragment = CrossLookoutFragment.newInstance();
         replaceMainFragment(crossLookoutFragment);
     }
 
     /**
      * Replaces the main screen fragment with a new fragment
+     *
      * @param newFragment
      */
-    private void replaceMainFragment(Fragment newFragment){
+    private void replaceMainFragment(Fragment newFragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, newFragment);
         transaction.addToBackStack(" ");
         transaction.commit();
     }
 
-    public void goToHomeFragment(){
+    public void goToHomeFragment() {
         HomeFragment homeFragment = HomeFragment.newInstance();
         replaceMainFragment(homeFragment);
     }
 
-    public void goToAzimuthFragment(){
+    public void goToAzimuthFragment() {
         InfoReportFragment infoReportFragment = InfoReportFragment.newInstance();
         replaceMainFragment(infoReportFragment);
     }
 
     /**
      * Shows an error dialog with the option to go to settings or cancel
+     *
      * @param message
      */
-    public void showErrorDialog(String message){
+    public void showErrorDialog(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message);
         builder.setCancelable(true);
@@ -199,9 +228,10 @@ public class HomeScreen extends AppCompatActivity {
 
     /**
      * Shows an error dialog with the provided message and an OK button that cancels the dialog
+     *
      * @param message
      */
-    public void showBasicErrorMessage(String message){
+    public void showBasicErrorMessage(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message);
         builder.setCancelable(true);
@@ -218,13 +248,13 @@ public class HomeScreen extends AppCompatActivity {
         errorDialog.show();
     }
 
-    public void goToMapFragment(Fragment mapFragment){
+    public void goToMapFragment(Fragment mapFragment) {
         replaceMainFragment(mapFragment);
     }
 
-    public boolean isConnectedToNetwork(){
+    public boolean isConnectedToNetwork() {
         ConnectivityManager cm =
-                (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&
@@ -235,6 +265,7 @@ public class HomeScreen extends AppCompatActivity {
 
     /**
      * When back button pressed in menu bar, goes back to previous page
+     *
      * @return
      */
     @Override
@@ -248,4 +279,46 @@ public class HomeScreen extends AppCompatActivity {
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
+
+    @Override
+    protected void onStop() {
+        if(isUsingLocation) {
+            stopLocationMonitoring();
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        if(isUsingLocation) {
+            startLocationMonitoring();
+        }
+        super.onStart();
+    }
+
+    public void startLocationMonitoring(){
+        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                .start(new OnLocationUpdatedListener() {
+                    @Override
+                    public void onLocationUpdated(Location location) {
+                        mLastLocation = location;
+                    }
+                });
+    }
+
+    public void stopLocationMonitoring(){
+        SmartLocation.with(this).location().stop();
+    }
+
+    public void setIsUsingLocation(boolean usingLocation){
+        if(!isUsingLocation && usingLocation){
+            isUsingLocation = usingLocation;
+            startLocationMonitoring();
+        }
+        if(isUsingLocation && !usingLocation){
+            isUsingLocation = usingLocation;
+            stopLocationMonitoring();
+        }
+    }
+
 }

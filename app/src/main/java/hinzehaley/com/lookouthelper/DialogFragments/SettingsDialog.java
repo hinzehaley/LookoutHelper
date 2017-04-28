@@ -17,11 +17,14 @@ import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import hinzehaley.com.lookouthelper.Constants;
+import hinzehaley.com.lookouthelper.HomeScreen;
 import hinzehaley.com.lookouthelper.PreferencesKeys;
 import hinzehaley.com.lookouthelper.R;
 
@@ -41,6 +44,8 @@ public class SettingsDialog extends DialogFragment {
     private SharedPreferences prefs;
     private Button btnDone;
     private Button btnCancel;
+    private LinearLayout layoutLookoutInfo;
+    private CheckBox checkBoxUseLocation;
     ArrayAdapter<CharSequence> adapterStates;
     LinearLayout mainLayout;
 
@@ -70,9 +75,22 @@ public class SettingsDialog extends DialogFragment {
         etPrincipalMeridian = (EditText) v.findViewById(R.id.et_meridian);
         btnDone = (Button) v.findViewById(R.id.btn_save_settings);
         btnCancel = (Button) v.findViewById(R.id.btn_cancel_settings);
+        layoutLookoutInfo = (LinearLayout) v.findViewById(R.id.layout_lookout_info);
+        checkBoxUseLocation = (CheckBox) v.findViewById(R.id.checkbox_use_location);
         fillInSpinners();
         prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
         fillInCompletedFields();
+
+        checkBoxUseLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(checkBoxUseLocation.isChecked()){
+                    updateUIUseLocation();
+                }else{
+                    updateUINoLocation();
+                }
+            }
+        });
 
         btnDone.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,10 +142,20 @@ public class SettingsDialog extends DialogFragment {
         }
         if(prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, -1) != -1){
             etPrincipalMeridian.setText(""+prefs.getInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, 0));
+        }if(prefs.getBoolean(PreferencesKeys.USE_LOCATION, false)){
+            updateUIUseLocation();
         }
     }
 
+    private void updateUIUseLocation(){
+        checkBoxUseLocation.setChecked(true);
+        layoutLookoutInfo.setVisibility(View.GONE);
+    }
 
+    private void updateUINoLocation(){
+        checkBoxUseLocation.setChecked(false);
+        layoutLookoutInfo.setVisibility(View.VISIBLE);
+    }
 
     /**
      * Saves information into SharedPreferences
@@ -159,6 +187,12 @@ public class SettingsDialog extends DialogFragment {
             int principalMeridian = Integer.parseInt(etPrincipalMeridian.getText().toString());
             prefsEditor.putInt(PreferencesKeys.PRINCIPAL_MERIDIAN_PREFERENCES_KEY, principalMeridian);
         }
+
+        prefsEditor.putBoolean(PreferencesKeys.USE_LOCATION, checkBoxUseLocation.isChecked());
+
+        HomeScreen homeScreen = (HomeScreen) getActivity();
+        homeScreen.setIsUsingLocation(checkBoxUseLocation.isChecked());
+
         prefsEditor.commit();
     }
 

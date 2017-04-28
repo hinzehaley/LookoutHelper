@@ -1,6 +1,7 @@
 package hinzehaley.com.lookouthelper.models;
 
 import android.content.Context;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -17,7 +18,9 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 
+import hinzehaley.com.lookouthelper.Interfaces.SingleElevationListener;
 import hinzehaley.com.lookouthelper.R;
+import hinzehaley.com.lookouthelper.fragments.InfoReportFragment;
 import hinzehaley.com.lookouthelper.fragments.MapReportFragment;
 
 /**
@@ -27,6 +30,19 @@ import hinzehaley.com.lookouthelper.fragments.MapReportFragment;
 public class VolleyRequester {
 
     static RequestQueue queue = null;
+
+    private static VolleyRequester requester;
+
+    public static VolleyRequester getInstance(){
+        if(requester == null){
+            requester = new VolleyRequester();
+        }
+       return requester;
+    }
+
+    private VolleyRequester(){
+
+    }
 
 
     public void requestMultipleElevations(double startLat, double startLon, double endLat, double endLon, final Context context, final MapReportFragment callerFragment, int numSamples, final int resultNum) {
@@ -87,7 +103,7 @@ public class VolleyRequester {
     queue.add(stringRequest);
 }
 
-    public void requestSingleElevation(double lat, double lon, final MapReportFragment callerFragment, Context context){
+    public void requestSingleElevation(double lat, double lon, final SingleElevationListener listener, Context context){
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(15);
 
@@ -109,7 +125,7 @@ public class VolleyRequester {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray arr = jsonObject.getJSONArray("results");
-                            callerFragment.singleElevationRetrieved(arr);
+                            listener.singleElevationRetrieved(arr);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -124,7 +140,7 @@ public class VolleyRequester {
                 Log.e("VOLLEY", "error response is: " + error.getMessage());
 
                 //TODO: handle error response
-                callerFragment.singleElevationRetrieved(null);
+                listener.singleElevationRetrieved(null);
 
             }
         });
