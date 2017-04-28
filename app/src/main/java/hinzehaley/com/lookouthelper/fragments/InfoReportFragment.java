@@ -321,9 +321,17 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
         double crossLat = 0;
         double crossLng = 0;
 
+        HomeScreen homeScreen = (HomeScreen) getActivity();
+
+
         if(spinnerCrossLookout.getSelectedItem() != null){
             spinnerItem = spinnerCrossLookout.getSelectedItem().toString();
             LatLng crossLocation = getCrossLocation(spinnerItem);
+
+            if(crossLocation == null){
+                homeScreen.showBasicErrorMessage(getString(R.string.no_lookout_set));
+                return;
+            }
             crossLat = crossLocation.latitude;
             crossLng = crossLocation.longitude;
         }
@@ -335,7 +343,6 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
         MapReportFragment mapReportFragment = MapReportFragment.newInstance(checkboxBaseVisible.isChecked(), checkboxHaveCross.isChecked(),
                 horizontalAzimuth, verticalAzimuth, crossHorizontalAzimuth, yourLocationElevation, crossLat, crossLng);
 
-        HomeScreen homeScreen = (HomeScreen) getActivity();
         homeScreen.goToMapFragment(mapReportFragment);
     }
 
@@ -355,6 +362,10 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
             }
         }else{
             yourLocationElevation = getLocationElevation();
+            if(yourLocationElevation == null){
+                homeScreen.showBasicErrorMessage(getString(R.string.no_lookout_set));
+                return false;
+            }
         }
         return true;
     }

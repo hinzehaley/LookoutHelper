@@ -87,13 +87,13 @@ public class HomeScreen extends AppCompatActivity {
 
         if(!prefs.getBoolean(PreferencesKeys.USE_LOCATION, false)) {
 
-            if (prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 0) == 0) {
+            if (prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 100000) == 100000) {
                 return false;
             }
-            if (prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 0) == 0) {
+            if (prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 100000) == 100000) {
                 return false;
             }
-            if (prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, -1) == -1) {
+            if (prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, -100000) == -100000) {
                 return false;
             }
         }
