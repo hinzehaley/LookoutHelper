@@ -111,4 +111,5 @@
     <string name="get_my_location">Use current location for reports</string>
     <string name="unable_to_get_location">Unable to retrieve current location. Wait a moment and try again. If that doesn\'t work, please make sure location monitoring is turned on in phone Settings, or set your location manually in application Settings.</string>
     <string name="unable_to_get_your_elevation">Unable to get elevation at your location. Please try again soon or set your location and elevation manually in application Settings.</string>
+    <string name="unable_to_get_cross_lookout_info">Unable to get cross lookout information. Please ensure the location is set correctly for the cross lookout.</string>
 </resources>

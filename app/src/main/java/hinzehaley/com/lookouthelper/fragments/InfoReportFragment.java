@@ -330,7 +330,7 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
             LatLng crossLocation = getCrossLocation(spinnerItem);
 
             if(crossLocation == null){
-                homeScreen.showBasicErrorMessage(getString(R.string.no_lookout_set));
+                homeScreen.showBasicErrorMessage(getString(R.string.unable_to_get_cross_lookout_info));
                 return;
             }
             crossLat = crossLocation.latitude;
