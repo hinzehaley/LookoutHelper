@@ -97,7 +97,6 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
         // gets lookout names from SharedPreferences and adds them to adapter
         prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
 
-        HomeScreen homeScreen = (HomeScreen) getActivity();
         requestSingleLocationElevation();
         getViewReferences();
         setCheckboxListeners();
@@ -290,9 +289,11 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
     }
 
     private LocationElevation getLocationElevation(){
+        prefs = getActivity().getSharedPreferences(getActivity().getPackageName(), Context.MODE_PRIVATE);
         float lat = prefs.getFloat(PreferencesKeys.LOOKOUT_LAT_PREFERENCES_KEY, 100000);
         float lng = prefs.getFloat(PreferencesKeys.LOOKOUT_LON_PREFERENCES_KEY, 100000);
         float elevation = prefs.getFloat(PreferencesKeys.LOOKOUT_ELEVATION_PREFERENCES_KEY, -100000);
+
         if(lat != 100000 && lng != 100000 && elevation != -100000) {
             Location location = new Location("");
             location.setLatitude(lat);
@@ -324,7 +325,7 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
         HomeScreen homeScreen = (HomeScreen) getActivity();
 
 
-        if(spinnerCrossLookout.getSelectedItem() != null){
+        if(checkboxHaveCross.isChecked()){
             spinnerItem = spinnerCrossLookout.getSelectedItem().toString();
             LatLng crossLocation = getCrossLocation(spinnerItem);
 
@@ -352,7 +353,7 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
             if(yourLocationElevation == null){
                 requestSingleLocationElevation();
                 if(homeScreen.mLastLocation == null){
-                    homeScreen.showBasicErrorMessage(getString(R.string.unable_to_get_location));
+                    homeScreen.showErrorDialog(getString(R.string.unable_to_get_location));
                     return false;
                 }else{
                     requestSingleLocationElevation();
@@ -363,7 +364,7 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
         }else{
             yourLocationElevation = getLocationElevation();
             if(yourLocationElevation == null){
-                homeScreen.showBasicErrorMessage(getString(R.string.no_lookout_set));
+                homeScreen.showErrorDialog(getString(R.string.no_lookout_set));
                 return false;
             }
         }
