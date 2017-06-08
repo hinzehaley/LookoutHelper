@@ -1,5 +1,6 @@
 package hinzehaley.com.lookouthelper.models;
 
+import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
@@ -31,7 +32,8 @@ public class GeoConverter {
      * @param section int
      * @param quarterSection of form NWSE to describe the Northwest corner of the SW quarter
      */
-    public void requestLocationFromLegal(ShowConversionsFragment showConversionsFragment, String state, int meridian, int township, int range, int section, String quarterSection, String townshipDirection, String rangeDirection){
+    public void requestLocationFromLegal(ShowConversionsFragment showConversionsFragment, String state, int meridian, int township, int range, int section, String quarterSection, String townshipDirection, String rangeDirection
+    , Context context){
         this.showConversionsFragment = showConversionsFragment;
         String url = Constants.GEOCOMMUNICATOR_DOMAIN + Constants.TOWNSHIP_TO_LAT_LON
                 + state +"+" + String.format("%02d", meridian) +"+"
@@ -42,7 +44,7 @@ public class GeoConverter {
        legal = "T" + township + townshipDirection + "R" + range +rangeDirection + "S" + section + quarterSection;
 
         Log.i("URL", " getting text from: " + url);
-        new RetrieveTextFromURL(this, false, true).execute(url);
+        VolleyRequester.retrieveText(context, this, url, false, true);
 
     }
 
@@ -52,7 +54,7 @@ public class GeoConverter {
      * @param lat
      * @param lon
      */
-    public void requestLegalFromLocation(ShowConversionsFragment showConversionsFragment, double lat, double lon){
+    public void requestLegalFromLocation(ShowConversionsFragment showConversionsFragment, double lat, double lon, Context context){
         this.showConversionsFragment = showConversionsFragment;
         this.location = new Location("");
         location.setLatitude(lat);
@@ -60,7 +62,7 @@ public class GeoConverter {
 
         String url = Constants.GEOCOMMUNICATOR_DOMAIN + Constants.LAT_LON_TO_TOWNSHIP + "lat=" + lat + "&lon=" + lon + Constants.UNITS_AND_FORMAT;
 
-        new RetrieveTextFromURL(this, true, false).execute(url);
+        VolleyRequester.retrieveText(context, this, url, true, false);
 
     }
 

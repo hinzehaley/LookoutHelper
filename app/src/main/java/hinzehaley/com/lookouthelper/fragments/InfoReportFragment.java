@@ -2,6 +2,7 @@ package hinzehaley.com.lookouthelper.fragments;
 
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -22,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -62,6 +64,7 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
     private SharedPreferences prefs;
 
     private LinearLayout mainLayout;
+    private ProgressDialog progressDialog;
 
 
 
@@ -143,11 +146,27 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
         HomeScreen homeScreen = (HomeScreen) getActivity();
         if(homeScreen.isUsingLocation) {
             if(homeScreen.isConnectedToNetwork()) {
+                showGettingElevationDialog();
                 VolleyRequester requester = VolleyRequester.getInstance();
                 requester.requestSingleElevation(homeScreen.mLastLocation.getLatitude(), homeScreen.mLastLocation.getLongitude(), this, getContext());
             }else{
                 homeScreen.showErrorDialog(getString(R.string.no_internet));
             }
+        }
+    }
+
+    private void showGettingElevationDialog(){
+        if(progressDialog == null) {
+            progressDialog = new ProgressDialog(getActivity());
+        }
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.getting_elevation));
+        progressDialog.show();
+    }
+
+    private void hideGettingElevationDialog(){
+        if(progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.hide();
         }
     }
 
@@ -169,16 +188,30 @@ public class InfoReportFragment extends Fragment implements SingleElevationListe
 
     @Override
     public void singleElevationRetrieved(JSONArray arr){
+        hideGettingElevationDialog();
         if(arr != null) {
             try {
                 yourLocationElevation = JSONParser.parseSingleElevation(arr);
+
                 return;
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
         HomeScreen homeScreen = (HomeScreen) getActivity();
-        homeScreen.showErrorDialog(getString(R.string.unable_to_get_your_elevation));
+        if(!this.isDetached()) {
+            homeScreen.showErrorDialog(getString(R.string.unable_to_get_your_elevation));
+        }
+        homeScreen.goToHomeFragment();
+    }
+
+    @Override
+    public void singleElevationError(VolleyError error) {
+        hideGettingElevationDialog();
+        HomeScreen homeScreen = (HomeScreen) getActivity();
+        if(!this.isDetached()) {
+            homeScreen.showErrorDialog(getString(R.string.unable_to_get_your_elevation));
+        }
         homeScreen.goToHomeFragment();
     }
 

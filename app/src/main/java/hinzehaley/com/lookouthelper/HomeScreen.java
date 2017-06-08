@@ -1,22 +1,35 @@
 package hinzehaley.com.lookouthelper;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import hinzehaley.com.lookouthelper.DialogFragments.SettingsDialog;
 import hinzehaley.com.lookouthelper.fragments.InfoReportFragment;
@@ -39,10 +52,15 @@ Test it all
  * Only Activity, controls which fragments are visible
  */
 
-public class HomeScreen extends AppCompatActivity {
+public class HomeScreen extends AppCompatActivity implements LocationListener{
 
     public Location mLastLocation;
     public boolean isUsingLocation = false;
+    GoogleApiClient mGoogleApiClient;
+    LocationRequest mLocationRequest;
+    public static final int REQUEST_PERMISSIONS_LOCATION = 5;
+    boolean justRequestedLocationPermissions = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +80,88 @@ public class HomeScreen extends AppCompatActivity {
         if (!lookoutInfoSet()) {
             showSettingsDialog();
         }
+
+        buildLocationRequest();
+        setUpGoogleApiClient();
+
+    }
+
+    protected void startLocationUpdates() {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if(!justRequestedLocationPermissions) {
+                justRequestedLocationPermissions = true;
+                requestLocationPermissions();
+            }else{
+                justRequestedLocationPermissions = false;
+            }
+            return;
+        }
+        PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                mGoogleApiClient, this);
+    }
+
+    private void requestLocationPermissions(){
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_PERMISSIONS_LOCATION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSIONS_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if(shouldBeMonitoringLocation()){
+                        startLocationUpdates();
+                    }
+
+                } else {
+                    justRequestedLocationPermissions = true;
+                    showBasicErrorMessage(getString(R.string.needs_location_permissions));
+
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+    private void setUpGoogleApiClient(){
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        if(shouldBeMonitoringLocation()){
+                            startLocationUpdates();
+                        }
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        mGoogleApiClient.connect();
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        showErrorDialog(getString(R.string.google_client_error));
+                    }
+                })
+                .build();
     }
 
     /**
@@ -296,22 +396,47 @@ public class HomeScreen extends AppCompatActivity {
         super.onStart();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mGoogleApiClient.isConnected()){
+            stopLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(mGoogleApiClient.isConnected()){
+
+            startLocationUpdates();
+        }
+    }
+
     public void startLocationMonitoring(){
-        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
-                .start(new OnLocationUpdatedListener() {
-                    @Override
-                    public void onLocationUpdated(Location location) {
-                        mLastLocation = location;
-                    }
-                });
+        if(mGoogleApiClient.isConnected()){
+            startLocationUpdates();
+        }else {
+            mGoogleApiClient.connect();
+        }
+
+    }
+
+    public void buildLocationRequest(){
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(5000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     public void stopLocationMonitoring(){
-        SmartLocation.with(this).location().stop();
+        if(mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
     public void setIsUsingLocation(boolean usingLocation){
-        if(!isUsingLocation && usingLocation){
+        if(usingLocation){
             isUsingLocation = usingLocation;
             startLocationMonitoring();
         }
@@ -320,5 +445,11 @@ public class HomeScreen extends AppCompatActivity {
             stopLocationMonitoring();
         }
     }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+    }
+
 
 }

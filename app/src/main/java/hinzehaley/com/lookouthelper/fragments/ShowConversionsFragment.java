@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import hinzehaley.com.lookouthelper.HomeScreen;
@@ -20,7 +21,7 @@ public class ShowConversionsFragment extends Fragment {
 
     private View v;
     private Location location;
-    private String legal;
+    private String legal = "";
 
     /**
      * Use this factory method to create a new instance of
@@ -109,7 +110,7 @@ public class ShowConversionsFragment extends Fragment {
 
         if(location != null && v != null){
             LinearLayout layoutConversions = (LinearLayout) v.findViewById(R.id.lin_layout_conversions);
-            TextView txtWait = (TextView) v.findViewById(R.id.txt_wait);
+            ProgressBar progressBarWait = (ProgressBar) v.findViewById(R.id.progress_wait);
             TextView txtLatDecimalDegrees = (TextView) v.findViewById(R.id.txt_lat_decimal_degrees);
             TextView txtLonDecimalDegrees = (TextView) v.findViewById(R.id.txt_lon_decimal_degrees);
             TextView txtLatDecimalMinutes = (TextView) v.findViewById(R.id.txt_lat_decimal_minutes);
@@ -119,7 +120,7 @@ public class ShowConversionsFragment extends Fragment {
             TextView txtLegal = (TextView) v.findViewById(R.id.txt_legal);
 
             layoutConversions.setVisibility(View.VISIBLE);
-            txtWait.setVisibility(View.GONE);
+            progressBarWait.setVisibility(View.GONE);
 
             String strLongitude = Location.convert(location.getLongitude(), Location.FORMAT_DEGREES);
             String strLatitude = Location.convert(location.getLatitude(), Location.FORMAT_DEGREES);
@@ -139,13 +140,14 @@ public class ShowConversionsFragment extends Fragment {
             txtLatSeconds.setText(getString(R.string.lat) + strLatitude);
             txtLonSeconds.setText(getString(R.string.lon) + strLongitude);
 
-            if(legal.equals("")){
+            if(legal.equals("") || legal.equals(getString(R.string.please_wait))){
                 legal = getString(R.string.no_legal);
             }
             txtLegal.setText(legal.toUpperCase());
 
         }
     }
+
 
     @Override
     public void onAttach(Context context) {

@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -574,6 +575,11 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback, S
         }
     }
 
+    @Override
+    public void singleElevationError(VolleyError error) {
+        error.printStackTrace();
+    }
+
     public static double meterToFoot(double meter){
         return meter / 0.3048;
     }
@@ -843,11 +849,12 @@ public class MapReportFragment extends Fragment implements OnMapReadyCallback, S
 
         }
         fm.beginTransaction().replace(R.id.conversions_container, showConversionsFragment).commit();
-
-
+        Location location = new Location("");
+        location.setLatitude(conversionPoint.latitude);
+        location.setLongitude(conversionPoint.longitude);
         geoConverter.requestLegalFromLocation(showConversionsFragment,
                 Location.convert(String.valueOf(conversionPoint.latitude)),
-                Location.convert(String.valueOf(conversionPoint.longitude)));
+                Location.convert(String.valueOf(conversionPoint.longitude)), getContext());
     }
 
     /**

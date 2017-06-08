@@ -3,14 +3,13 @@
     android:layout_height="match_parent"
     tools:context="hinzehaley.com.lookouthelper.fragments.ShowConversionsFragment">
 
-    <TextView
-        android:id="@+id/txt_wait"
-        android:textSize="25dp"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:text="Please wait..."
+    <ProgressBar
+        android:id="@+id/progress_wait"
         android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        style="@android:style/Widget.ProgressBar.Small"
         android:layout_height="wrap_content" />
+
 
     <ScrollView
         android:layout_width="match_parent"

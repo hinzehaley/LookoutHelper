@@ -228,7 +228,7 @@ public class ConverterFragment extends Fragment {
                             geoConverter.requestLocationFromLegal(showConversionsFragment, state, principalMeridian, Integer.parseInt(etTownship.getText().toString()),
                                     Integer.parseInt(etRange.getText().toString()),
                                     Integer.parseInt(etSection.getText().toString()),
-                                    etQuarterSection.getText().toString(), spinnerTownship.getSelectedItem().toString(), spinnerRange.getSelectedItem().toString());
+                                    etQuarterSection.getText().toString(), spinnerTownship.getSelectedItem().toString(), spinnerRange.getSelectedItem().toString(), getContext());
                             //hide soft keyboard
                             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
@@ -243,7 +243,7 @@ public class ConverterFragment extends Fragment {
                         try {
                             geoConverter.requestLegalFromLocation(showConversionsFragment,
                                     Location.convert(etLat.getText().toString()),
-                                    Location.convert(etLon.getText().toString()));
+                                    Location.convert(etLon.getText().toString()), getContext());
                             //hide soft keyboard
                             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);

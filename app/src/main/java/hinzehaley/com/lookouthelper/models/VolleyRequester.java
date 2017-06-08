@@ -116,6 +116,8 @@ public class VolleyRequester {
             queue = Volley.newRequestQueue(context);
         }
 
+        Log.i("VOLLEY", "url is: " + url);
+
 
         // Request a string response from the provided URL. Passes reponse into callerFragment
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -125,6 +127,7 @@ public class VolleyRequester {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray arr = jsonObject.getJSONArray("results");
+                            Log.i("VOLLEY", "result is: " + arr.toString());
                             listener.singleElevationRetrieved(arr);
 
                         } catch (JSONException e) {
@@ -140,7 +143,8 @@ public class VolleyRequester {
                 Log.e("VOLLEY", "error response is: " + error.getMessage());
 
                 //TODO: handle error response
-                listener.singleElevationRetrieved(null);
+                listener.singleElevationError(error);
+
 
             }
         });
@@ -155,5 +159,55 @@ public class VolleyRequester {
         stringRequest.setShouldCache(false);
         queue.add(stringRequest);
 
+    }
+
+    public static void retrieveText(Context context, final GeoConverter geoConverter, String url, final boolean isLatLng, final boolean isLegal){
+        // Instantiate the RequestQueue.
+        if(queue == null) {
+            queue = Volley.newRequestQueue(context);
+        }
+
+        Log.i("VOLLEY", "url is: " + url);
+
+
+        // Request a string response from the provided URL. Passes reponse into callerFragment
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        if(isLegal) {
+                            Log.i("URL", "is legal " + response);
+                            geoConverter.retrievedLocationString(response);
+                        }else{
+                            Log.i("URL", "not legal " + response);
+
+                            geoConverter.retrievedLegalString(response);
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("VOLLEY", "error response is: " + error.getMessage());
+                error.printStackTrace();
+
+            }
+        }){
+            @Override
+            public Priority getPriority() {
+                return Priority.IMMEDIATE;
+            }
+        };
+
+        //15000 milliseconds to timeout
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                15000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        // Add the request to the RequestQueue. Does not cache results
+        stringRequest.setShouldCache(false);
+        queue.add(stringRequest);
     }
 }

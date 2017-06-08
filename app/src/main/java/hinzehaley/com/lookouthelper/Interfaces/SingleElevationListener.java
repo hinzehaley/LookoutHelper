@@ -1,5 +1,7 @@
 package hinzehaley.com.lookouthelper.Interfaces;
 
+import com.android.volley.VolleyError;
+
 import org.json.JSONArray;
 
 /**
@@ -9,4 +11,5 @@ import org.json.JSONArray;
 public interface SingleElevationListener {
 
     public void singleElevationRetrieved(JSONArray arr);
+    public void singleElevationError(VolleyError error);
 }

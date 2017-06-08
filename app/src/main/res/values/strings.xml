@@ -25,7 +25,11 @@
     <string name="clicked_location">Clicked Location</string>
     <string name="fire_location">Fire Location</string>
     <string name="fields_empty">Please fill out all fields to add lookout</string>
-
+    <string name="please_wait">Please wait...</string>
+    <string name="google_client_error">Unable to connect to Google API Client.</string>
+    <string name="needs_location_permissions">You need to enable location permissions to use your current location.
+    Please update the settings to use a custom location or accept location permissions.</string>
+    <string name="getting_elevation">Getting elevation...</string>
 
     <string-array name="spinner_north_south">
         <item>N</item>
