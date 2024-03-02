@@ -92,8 +92,6 @@ public class ShowConversionsFragment extends Fragment {
         if(legal == null && !this.isDetached()){
             HomeScreen activity = (HomeScreen) getActivity();
             activity.showBasicErrorMessage(getString(R.string.could_not_parse_coordinates));
-            activity.onBackPressed();
-            return;
         }
 
         this.location = location;
@@ -140,7 +138,7 @@ public class ShowConversionsFragment extends Fragment {
             txtLatSeconds.setText(getString(R.string.lat) + strLatitude);
             txtLonSeconds.setText(getString(R.string.lon) + strLongitude);
 
-            if(legal.equals("") || legal.equals(getString(R.string.please_wait))){
+            if(legal == null || legal.equals("") || legal.equals(getString(R.string.please_wait))){
                 legal = getString(R.string.no_legal);
             }
             txtLegal.setText(legal.toUpperCase());
@@ -152,7 +150,7 @@ public class ShowConversionsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if(this.location != null && this.legal != null){
+        if(this.location != null){
             displayLocation();
         }
     }
